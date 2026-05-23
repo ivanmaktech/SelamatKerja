@@ -6,7 +6,7 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:post
 
 const pool = new Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 const createTables = async () => {

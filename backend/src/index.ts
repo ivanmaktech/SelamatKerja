@@ -19,3 +19,5 @@ app.listen(port, () => {
 // Trigger restart
 
 // Trigger restart 2
+
+// Restart nodemon

@@ -75,7 +75,6 @@ const runWithFallback = async (
             console.error(`Groq Error (${label}):`, groqErr);
             return fallback();
         }
-    }
 };
 
 const buildFallbackAnswer = (context: string) => {

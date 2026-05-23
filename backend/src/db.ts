@@ -6,7 +6,7 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:post
 const pool = new Pool({
   connectionString,
   // Add SSL if we're connecting to the remote NovaCloud server but allow unauthorized certificates for demo purposes
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 pool.on('error', (err, client) => {
