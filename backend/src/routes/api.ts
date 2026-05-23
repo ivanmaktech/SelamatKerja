@@ -8,6 +8,9 @@ import express from 'express';
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// Test route
+router.get('/ping', (req, res) => res.json({ success: true, message: 'pong' }));
+
 // Auth routes
 router.post('/auth/signup', signup);
 router.post('/auth/login', login);

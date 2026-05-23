@@ -10,6 +10,8 @@ const authController_1 = require("../controllers/authController");
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const upload = (0, multer_1.default)({ dest: 'uploads/' });
+// Test route
+router.get('/ping', (req, res) => res.json({ success: true, message: 'pong' }));
 // Auth routes
 router.post('/auth/signup', authController_1.signup);
 router.post('/auth/login', authController_1.login);

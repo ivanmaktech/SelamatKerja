@@ -44,14 +44,28 @@ export const askQuestion = async (req: Request, res: Response) => {
     try {
         const { question } = req.body;
         
-        // Process intent
-        const intent = await processChatIntent(question);
+        // Process intent (guard against intent-parsing failures)
+        let intent: any;
+        try {
+            intent = await processChatIntent(question);
+        } catch (intentErr) {
+            console.error('Intent parsing error, falling back to QA:', intentErr);
+            intent = { type: 'qa' };
+        }
         
         if (intent.type === 'job_search' && intent.preferences) {
+            try {
             // Get all jobs and score them to avoid strict exact match failures
-            const result = await db.query('SELECT * FROM jobs');
-            
-            const jobs = result.rows.map(r => {
+            let result;
+            try {
+                result = await db.query('SELECT * FROM jobs');
+            } catch (dbErr) {
+                console.error('DB error while fetching jobs:', dbErr);
+                // Fallback to empty jobs list if DB is unavailable to avoid 500
+                result = { rows: [] } as any;
+            }
+
+            const jobs = result.rows.map((r: any) => {
                 const job = {
                     id: r.id,
                     employerName: r.employer_name,
@@ -94,18 +108,24 @@ export const askQuestion = async (req: Request, res: Response) => {
             });
             
             // Sort by match percentage and take top 3
-            jobs.sort((a, b) => b.matchPercentage - a.matchPercentage);
-            const topJobs = jobs.filter(j => j.matchPercentage > 40).slice(0, 3);
+            jobs.sort((a: any, b: any) => b.matchPercentage - a.matchPercentage);
+            const topJobs = jobs.filter((j: any) => j.matchPercentage > 40).slice(0, 3);
             
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 data: {
                     type: 'job_match',
                     message: topJobs.length > 0 ? "I found some jobs that match your preferences!" : "I couldn't find exact matches, but here are some suggestions.",
                     jobs: topJobs.length > 0 ? topJobs : jobs.slice(0, 3)
-                } 
+                }
             });
             return;
+            } catch (jobErr) {
+                console.error('Error processing job_search intent:', jobErr);
+                // Return a graceful fallback instead of 500
+                res.json({ success: true, data: { type: 'job_match', message: 'Could not load job matches right now. Try again later.', jobs: [] } });
+                return;
+            }
         }
 
         // Default QA
