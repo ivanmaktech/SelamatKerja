@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { LogOut, ShieldCheck } from 'lucide-react';
 import type { User, KakakProfile, EmployerProfile } from './types';
@@ -204,33 +205,111 @@ function App() {
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (loginData: { role: 'kakak' | 'employer'; name: string; email: string }) => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsInitializing(false);
+      return;
+    }
+
+    // Auto-login with token
+    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => {
+      const dbUser = res.data.user;
+      const parsedUser: User = { role: dbUser.role, email: dbUser.email };
+      if (dbUser.role === 'kakak') {
+        parsedUser.kakakProfile = dbUser.profileData;
+      } else {
+        parsedUser.employerProfile = dbUser.profileData;
+      }
+      
+      if (!dbUser.profileData || Object.keys(dbUser.profileData).length === 0) {
+        setPendingUser(parsedUser);
+        setAppState('onboarding');
+      } else {
+        setUser(parsedUser);
+        setAppState('app');
+      }
+    })
+    .catch(() => {
+      localStorage.removeItem('token');
+    })
+    .finally(() => setIsInitializing(false));
+  }, []);
+
+  const handleLogin = (loginData: any) => {
     const newUser: User = { role: loginData.role, email: loginData.email };
-    setPendingUser(newUser);
-    setAppState('onboarding');
+    if (loginData.role === 'kakak') {
+      newUser.kakakProfile = loginData.profileData;
+    } else {
+      newUser.employerProfile = loginData.profileData;
+    }
+
+    if (!loginData.profileData || Object.keys(loginData.profileData).length === 0) {
+      setPendingUser(newUser);
+      setAppState('onboarding');
+    } else {
+      setUser(newUser);
+      setAppState('app');
+    }
   };
 
-  const handleKakakOnboardingComplete = (profile: KakakProfile) => {
+  const handleKakakOnboardingComplete = async (profile: KakakProfile) => {
     if (!pendingUser) return;
     const completeUser: User = { ...pendingUser, kakakProfile: profile };
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/profile`, 
+          { profileData: profile },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (e) {
+      console.error('Failed to save profile', e);
+    }
+
     setUser(completeUser);
     setPendingUser(null);
     setAppState('app');
   };
 
-  const handleEmployerOnboardingComplete = (profile: EmployerProfile) => {
+  const handleEmployerOnboardingComplete = async (profile: EmployerProfile) => {
     if (!pendingUser) return;
     const completeUser: User = { ...pendingUser, employerProfile: profile };
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/profile`, 
+          { profileData: profile },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (e) {
+      console.error('Failed to save profile', e);
+    }
+
     setUser(completeUser);
     setPendingUser(null);
     setAppState('app');
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     setUser(null);
     setPendingUser(null);
     setAppState('login');
   };
+
+  if (isInitializing) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-blue-600 font-bold">Loading...</div>;
+  }
 
   // ── LOGIN SCREEN ──
   if (appState === 'login') {
@@ -255,11 +334,27 @@ function App() {
     }
   }
 
+  const handleUpdateUser = async (u: User) => {
+    setUser(u);
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const profileData = u.role === 'kakak' ? u.kakakProfile : u.employerProfile;
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/profile`, 
+          { profileData },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (e) {
+      console.error('Failed to update profile', e);
+    }
+  };
+
   // ── APP SCREEN ──
   if (appState === 'app' && user) {
     return (
       <Router>
-        <AppShell user={user} onLogout={handleLogout} onUpdateUser={setUser} />
+        <AppShell user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
       </Router>
     );
   }

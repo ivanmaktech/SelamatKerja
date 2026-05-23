@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { ShieldCheck, UserCheck, Briefcase, Eye, EyeOff, Lock, Mail, UserPlus, LogIn } from 'lucide-react';
 
 interface LoginProps {
@@ -31,7 +32,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setConfirmPassword('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -41,8 +42,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setError('Passwords do not match.'); return;
     }
 
-    const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    onLogin({ role: roleTab, name, email });
+    try {
+      const endpoint = authMode === 'signup' ? '/auth/signup' : '/auth/login';
+      const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      
+      const payload = authMode === 'signup' 
+        ? { email, password, role: roleTab, name }
+        : { email, password };
+
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}${endpoint}`, payload);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        onLogin(response.data.user);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Authentication failed. Please try again.');
+    }
   };
 
   return (
