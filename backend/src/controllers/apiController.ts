@@ -1,8 +1,8 @@
-
 import { Request, Response } from 'express';
-import { explainRawContract, checkRecruitmentFee, answerRightsQuestion, suggestContractRedFlags } from '../services/geminiService';
+import { explainRawContract, checkRecruitmentFee, answerRightsQuestion, suggestContractRedFlags, processChatIntent } from '../services/geminiService';
 import { extractContractFields, extractContractText, hasAnyExtractedField } from '../services/contractParsingService';
 import { evaluateContractFairness } from '../services/geminiService';
+import db from '../db';
 
 export const explainContract = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -42,8 +42,53 @@ export const checkFee = async (req: Request, res: Response) => {
 export const askQuestion = async (req: Request, res: Response) => {
     try {
         const { question } = req.body;
+        
+        // Process intent
+        const intent = await processChatIntent(question);
+        
+        if (intent.type === 'job_search' && intent.preferences) {
+            // Match jobs
+            let query = 'SELECT * FROM jobs WHERE 1=1';
+            const params: any[] = [];
+            
+            if (intent.preferences.jobType) {
+                params.push(`%${intent.preferences.jobType}%`);
+                query += ` AND job_type ILIKE $${params.length}`;
+            }
+            if (intent.preferences.minSalary) {
+                params.push(intent.preferences.minSalary);
+                query += ` AND salary >= $${params.length}`;
+            }
+            
+            query += ' LIMIT 3';
+            const result = await db.query(query, params);
+            
+            const jobs = result.rows.map(r => ({
+                id: r.id,
+                employerName: r.employer_name,
+                salary: r.salary,
+                jobType: r.job_type,
+                restDays: r.rest_days,
+                accommodation: r.accommodation,
+                deductions: r.deductions,
+                jobDescription: r.job_description,
+                languageRequirement: r.language_requirement
+            }));
+            
+            res.json({ 
+                success: true, 
+                data: {
+                    type: 'job_match',
+                    message: jobs.length > 0 ? "I found some jobs that match your preferences!" : "I couldn't find exact matches, but here are some suggestions.",
+                    jobs
+                } 
+            });
+            return;
+        }
+
+        // Default QA
         const answer = await answerRightsQuestion(question);
-        res.json({ success: true, data: answer });
+        res.json({ success: true, data: { type: 'qa', message: answer } });
     } catch (error) {
         console.error('Error answering question', error);
         res.status(500).json({ success: false, error: 'Failed to answer question' });

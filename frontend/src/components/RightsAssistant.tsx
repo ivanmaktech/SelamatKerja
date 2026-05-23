@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Send, Bot } from 'lucide-react';
+import { Send, Bot, Briefcase, MapPin, DollarSign, ChevronRight } from 'lucide-react';
+import { JobPosting } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 const RightsAssistant: React.FC = () => {
     const [question, setQuestion] = useState('');
     const [loading, setLoading] = useState(false);
-    const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string }[]>([
-        { role: 'bot', text: 'Hello! I am here to help answer questions about your rights and employment. For example: "Can my employer keep my passport?"' }
+    const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string, type?: 'qa' | 'job_match', jobs?: JobPosting[] }>([
+        { role: 'bot', text: 'Hello! I am here to help answer questions about your rights and employment. Or, tell me your job preferences and I will find matches for you!' }
     ]);
+    const navigate = useNavigate();
 
     const handleAsk = async () => {
         if (!question.trim()) return;
@@ -20,7 +23,14 @@ const RightsAssistant: React.FC = () => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/ask`, { question: q });
             if (response.data.success) {
-                setChat(prev => [...prev, { role: 'bot', text: response.data.data }]);
+                const responseData = response.data.data;
+                if (typeof responseData === 'string') {
+                    // Fallback for old API format
+                    setChat(prev => [...prev, { role: 'bot', text: responseData }]);
+                } else {
+                    // New structured format
+                    setChat(prev => [...prev, { role: 'bot', text: responseData.message, type: responseData.type, jobs: responseData.jobs }]);
+                }
             }
         } catch (error) {
             console.error("Error asking question:", error);
@@ -47,6 +57,28 @@ const RightsAssistant: React.FC = () => {
                         )}
                         <div className={`p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
                             {msg.text}
+                            {msg.type === 'job_match' && msg.jobs && msg.jobs.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                    {msg.jobs.map(job => (
+                                        <div key={job.id} onClick={() => navigate('/matching')} className="bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer hover:border-teal-300 hover:shadow-sm transition-all group">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-bold text-gray-900 group-hover:text-teal-700 transition-colors">{job.jobType}</div>
+                                                    <div className="text-xs text-gray-500 mt-0.5 flex items-center">
+                                                        <MapPin className="w-3 h-3 mr-1" /> {job.employerName}
+                                                    </div>
+                                                </div>
+                                                <div className="bg-teal-50 text-teal-700 text-xs font-bold px-2 py-1 rounded-lg flex items-center">
+                                                    RM {job.salary}
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 text-xs text-teal-600 font-semibold flex items-center">
+                                                View Match Details <ChevronRight className="w-3 h-3 ml-0.5" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

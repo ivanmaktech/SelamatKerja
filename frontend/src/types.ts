@@ -28,6 +28,18 @@ export interface EmployerProfile {
   overtimePolicy: string;   // 'paid' | 'time-off' | 'none'
 }
 
+export interface JobPosting {
+  id: string;
+  employerName: string;
+  salary: number;
+  jobType: string;
+  restDays: number;
+  accommodation: string;
+  deductions: number;
+  jobDescription: string;
+  languageRequirement: string;
+}
+
 export interface User {
   role: 'kakak' | 'employer';
   email: string;

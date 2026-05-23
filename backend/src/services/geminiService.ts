@@ -240,6 +240,39 @@ User Question: ${question}
     return runWithFallback('answerRightsQuestion', prompt, () => buildFallbackAnswer(ragContext));
 };
 
+export const processChatIntent = async (question: string): Promise<{ type: 'job_search' | 'qa', answer?: string, preferences?: any }> => {
+    const prompt = `
+You are an AI assistant for domestic workers. 
+Analyze the user's input: "${question}"
+
+Determine if the user is stating their job preferences to find a job (e.g. "I want childcare", "Looking for RM 1500") OR asking a general question.
+Respond ONLY with a valid JSON object, no markdown blocks.
+
+If it's a job search, output:
+{
+  "type": "job_search",
+  "preferences": {
+    "jobType": "extracted job type or empty",
+    "minSalary": extracted number or 0
+  }
+}
+
+If it's a general question or anything else, output:
+{
+  "type": "qa"
+}
+`;
+    
+    try {
+        const rawJson = await runWithFallback('processChatIntent', prompt, () => '{"type":"qa"}');
+        const cleanJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(cleanJson);
+    } catch (e) {
+        console.error("Failed to parse intent JSON", e);
+        return { type: 'qa' };
+    }
+};
+
 export const explainJobMatch = async (
     preferences: { expectedSalary: string; jobType: string; restDays: string; accommodation: string; language?: string },
     job: { salary: number; jobType: string; restDays: number; accommodation: string; languageRequirement: string },
