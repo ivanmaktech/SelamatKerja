@@ -13,9 +13,13 @@ app.use(express.json());
 
 app.use('/api', apiRoutes);
 
-app.listen(port, () => {
-    console.log(`SelamatKerja backend listening at http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`SelamatKerja backend listening at http://localhost:${port}`);
+    });
+}
+
+export default app;
 // Trigger restart
 
 // Trigger restart 2
