@@ -10,6 +10,7 @@ import {
   MapPin 
 } from 'lucide-react';
 
+import { useLocation } from 'react-router-dom';
 export interface KakakPreferences {
   expectedSalary: string; // "1500-1800" | "1800-2200" | "2200+"
   jobType: string; // childcare | elderly care | housekeeping | cooking
@@ -109,9 +110,10 @@ interface JobMatcherProps {
 }
 
 const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences }) => {
+  const location = useLocation();
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [preferences, setPreferences] = useState<KakakPreferences | null>(initialPreferences || null);
-  const [isOnboarding, setIsOnboarding] = useState(!initialPreferences);
+  const [isOnboarding, setIsOnboarding] = useState(!initialPreferences && !location.state?.autoOpenJob);
   
   // Job Matching Details Modal State
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
@@ -146,7 +148,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
       setPrefRestDays(prefs.restDays);
       setPrefAccom(prefs.accommodation);
       setPrefLang(prefs.language ?? 'Malay/Indonesian');
-    } else if (userName === 'Siti Rahma') {
+    } else if (userName === 'Siti Rahma' || location.state?.autoOpenJob) {
       setPreferences(DEMO_PREFERENCES_SITI);
       setPrefJobType(DEMO_PREFERENCES_SITI.jobType);
       setPrefSalary(DEMO_PREFERENCES_SITI.expectedSalary);
@@ -157,7 +159,16 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
       setPreferences(null);
       setIsOnboarding(true);
     }
-  }, [userName, initialPreferences]);
+  }, [userName, initialPreferences, location.state]);
+
+  // Handle auto-open job from routing
+  useEffect(() => {
+    if (location.state?.autoOpenJob && preferences) {
+      generateExplanation(location.state.autoOpenJob, location.state.autoOpenScore || 50);
+      // Clear the state so it doesn't reopen if they close and trigger another render
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, preferences]);
 
 
   const fetchJobs = async () => {
@@ -288,7 +299,11 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
     setExplanation('');
     setLoadingExplanation(true);
 
-    if (!preferences) return;
+    if (!preferences) {
+      setLoadingExplanation(false);
+      setExplanation('Please complete your profile preferences first to get a personalized AI match explanation.');
+      return;
+    }
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/explain-match`, {

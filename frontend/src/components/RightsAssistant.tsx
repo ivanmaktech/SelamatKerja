@@ -60,7 +60,7 @@ const RightsAssistant: React.FC = () => {
                             {msg.type === 'job_match' && msg.jobs && msg.jobs.length > 0 && (
                                 <div className="mt-4 flex overflow-x-auto space-x-3 pb-3 scrollbar-hide snap-x">
                                     {msg.jobs.map(job => (
-                                        <div key={job.id} onClick={() => navigate('/matching')} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group min-w-[220px] max-w-[220px] h-36 flex flex-col justify-between snap-center flex-shrink-0">
+                                        <div key={job.id} onClick={() => navigate('/matching', { state: { autoOpenJob: job, autoOpenScore: job.matchPercentage } })} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group min-w-[220px] max-w-[220px] h-36 flex flex-col justify-between snap-center flex-shrink-0">
                                             <div>
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="font-bold text-gray-900 group-hover:text-teal-700 transition-colors line-clamp-1">{job.jobType}</div>
