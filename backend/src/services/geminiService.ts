@@ -270,7 +270,7 @@ Rules:
 4. Keep the tone warm, simple, and encouraging.
 5. Use "✓" for preferences that are met or exceeded (e.g. ✓ Matches childcare preference).
 6. Use "⚠" for preferences that are not met (e.g. ⚠ Lower salary than expected).
-7. VERY IMPORTANT: Write the entire response in the language specified in the worker's preferred language: ${preferences.language || 'English'}. If the preference is "Basic Only" or "None", default to simple Malay/Indonesian.
+7. VERY IMPORTANT: Write the entire response in English to match the system UI language. Do not translate to other languages.
 
 Format:
 - Bullet 1
@@ -329,7 +329,7 @@ Rules:
 2. Keep it extremely simple, no legal jargon.
 3. Do not repeat the exact text from the contract, just summarize the fairness.
 4. Use "✓" if it aligns well or is fair, use "⚠" if there is a concern (e.g. deductions, unclear overtime, lower salary).
-5. VERY IMPORTANT: Write the entire response in the worker's preferred language: ${preferences.language || 'English'}. If "Basic Only" or "None", default to simple Malay/Indonesian.
+5. VERY IMPORTANT: Write the entire response in English to match the system UI language. Do not translate to other languages.
 `;
 
     return runWithFallback('evaluateContractFairness', prompt, () => "✓ Contract received.\n⚠ Please review terms carefully.");
