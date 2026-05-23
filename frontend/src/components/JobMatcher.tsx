@@ -638,41 +638,41 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
       {/* Modal: Job Details & AI Explanation */}
       {selectedJob && preferences && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto p-6 shadow-2xl relative space-y-5 animate-scale-up">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto p-6 shadow-2xl relative space-y-5 animate-scale-up">
             
-            <div className="flex items-start justify-between border-b pb-4">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-bold text-gray-900 text-lg leading-tight">{getJobTypeLabel(selectedJob.jobType)}</h3>
+                  <h3 className="font-bold text-white text-lg leading-tight">{getJobTypeLabel(selectedJob.jobType)}</h3>
                   {matchScore >= 70 && (
-                    <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="bg-blue-900/40 text-blue-300 border border-blue-800/50 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                       Recommended
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 flex items-center">
-                  <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" /> Employer: {selectedJob.employerName}
+                <p className="text-xs text-slate-400 flex items-center">
+                  <MapPin className="w-3.5 h-3.5 mr-1 text-slate-500" /> Employer: {selectedJob.employerName}
                 </p>
               </div>
               <button 
                 onClick={() => setSelectedJob(null)}
-                className="p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                className="p-1 rounded-full text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl">
+            <div className="flex items-center space-x-4 bg-gradient-to-r from-slate-800 to-slate-800/50 border border-slate-700 p-4 rounded-2xl">
               <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-white text-base shadow-md ${
                 matchScore >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
-                matchScore >= 50 ? 'bg-gradient-to-r from-blue-50 hover:bg-blue-100 text-blue-800 border' :
+                matchScore >= 50 ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' :
                 'bg-gradient-to-r from-orange-500 to-amber-500'
               }`}>
                 {matchScore}%
               </div>
               <div className="flex-1 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Alignment Score</span>
-                <p className="text-sm font-bold text-blue-950">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alignment Score</span>
+                <p className="text-sm font-bold text-slate-200">
                   {matchScore >= 80 ? 'Excellent match with your search profile!' :
                    matchScore >= 50 ? 'Good alignment, but note terms differences.' :
                    'Low alignment score. Read terms carefully.'}
@@ -682,10 +682,10 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
 
             {/* AI Explanation Layer */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center space-x-1">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1" /> AI Explanation Layer
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400 mr-1" /> AI Explanation Layer
               </h4>
-              <div className="bg-blue-950 text-white p-4 rounded-2xl shadow-inner relative overflow-hidden min-h-[70px] flex items-center">
+              <div className="bg-slate-950 border border-slate-800 text-white p-4 rounded-2xl shadow-inner relative overflow-hidden min-h-[70px] flex items-center">
                 {loadingExplanation ? (
                   <div className="flex items-center space-x-2 text-xs font-semibold text-blue-200">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -711,49 +711,49 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                   </div>
                 )}
               </div>
-              <p className="text-[10px] text-gray-400 leading-normal italic">
+              <p className="text-[10px] text-slate-500 leading-normal italic">
                 AI explains reasons based on matches. AI does not decide matches or replace recruitment processes.
               </p>
             </div>
 
             {/* Detailed Table */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Full Job Specifications</h4>
-              <div className="border border-gray-100 rounded-2xl overflow-hidden text-xs">
-                <div className="flex justify-between p-3 border-b bg-gray-50 font-medium">
-                  <span className="text-gray-500">Expected Salary</span>
-                  <span className="font-bold text-gray-900">RM {selectedJob.salary}</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Job Specifications</h4>
+              <div className="border border-slate-700 rounded-2xl overflow-hidden text-xs">
+                <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
+                  <span className="text-slate-400">Expected Salary</span>
+                  <span className="font-bold text-slate-100">RM {selectedJob.salary}</span>
                 </div>
-                <div className="flex justify-between p-3 border-b font-medium">
-                  <span className="text-gray-500">Duties / Job Type</span>
-                  <span className="font-bold text-gray-900">{getJobTypeLabel(selectedJob.jobType)}</span>
+                <div className="flex justify-between p-3 border-b border-slate-700 font-medium">
+                  <span className="text-slate-400">Duties / Job Type</span>
+                  <span className="font-bold text-slate-100">{getJobTypeLabel(selectedJob.jobType)}</span>
                 </div>
-                <div className="flex justify-between p-3 border-b bg-gray-50 font-medium">
-                  <span className="text-gray-500">Rest Days Per Month</span>
-                  <span className="font-bold text-gray-900">{selectedJob.restDays} days</span>
+                <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
+                  <span className="text-slate-400">Rest Days Per Month</span>
+                  <span className="font-bold text-slate-100">{selectedJob.restDays} days</span>
                 </div>
-                <div className="flex justify-between p-3 border-b font-medium">
-                  <span className="text-gray-500">Accommodation Type</span>
-                  <span className="font-bold text-gray-900">{selectedJob.accommodation}</span>
+                <div className="flex justify-between p-3 border-b border-slate-700 font-medium">
+                  <span className="text-slate-400">Accommodation Type</span>
+                  <span className="font-bold text-slate-100">{selectedJob.accommodation}</span>
                 </div>
-                <div className="flex justify-between p-3 border-b bg-gray-50 font-medium">
-                  <span className="text-gray-500">Required Language</span>
-                  <span className="font-bold text-gray-900">{selectedJob.languageRequirement}</span>
+                <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
+                  <span className="text-slate-400">Required Language</span>
+                  <span className="font-bold text-slate-100">{selectedJob.languageRequirement}</span>
                 </div>
                 {selectedJob.deductions > 0 && (
-                  <div className="flex justify-between p-3 bg-red-50 text-red-950 font-medium">
-                    <span className="text-red-700 flex items-center">
+                  <div className="flex justify-between p-3 bg-red-950/40 text-red-100 border-t border-red-900/50 font-medium">
+                    <span className="text-red-400 flex items-center">
                       <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Deductions
                     </span>
-                    <span className="font-bold text-red-900">RM {selectedJob.deductions}</span>
+                    <span className="font-bold text-red-200">RM {selectedJob.deductions}</span>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Description</h4>
-              <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-2xl border border-gray-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Description</h4>
+              <p className="text-xs text-slate-300 leading-relaxed bg-slate-800/30 p-3 rounded-2xl border border-slate-700/50">
                 {selectedJob.jobDescription}
               </p>
             </div>
@@ -762,7 +762,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
               {interestedJobs.includes(selectedJob.id) ? (
                 <button
                   disabled
-                  className="w-full py-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 transition-colors text-center block flex items-center justify-center space-x-1.5"
+                  className="w-full py-3 bg-emerald-900/40 text-emerald-300 rounded-xl text-xs font-bold border border-emerald-800 transition-colors text-center block flex items-center justify-center space-x-1.5"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Interest Sent! Employer will review.</span>
@@ -771,7 +771,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                 <button
                   onClick={handleInterest}
                   disabled={isSubmittingInterest}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all text-center flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all text-center flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/20"
                 >
                   {isSubmittingInterest ? 'Sending...' : "I'm Interested"}
                 </button>
@@ -779,7 +779,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
               
               <button
                 onClick={() => setSelectedJob(null)}
-                className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-bold transition-colors text-center block"
+                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors text-center block border border-slate-700 hover:border-slate-600"
               >
                 Back to Matched List
               </button>
