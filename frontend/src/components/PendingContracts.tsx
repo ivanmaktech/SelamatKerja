@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FileText, Sparkles, AlertTriangle, CheckCircle, ChevronRight, X, Clock } from 'lucide-react';
-import type { StructuredContract, KakakPreferences } from '../types';
+import type { StructuredContract, KakakProfile } from '../types';
 import { useTranslation } from '../i18n';
 
 interface PendingContractsProps {
   userName: string;
-  preferences: KakakPreferences | null;
+  preferences: KakakProfile | null;
 }
 
 const PendingContracts: React.FC<PendingContractsProps> = ({ userName, preferences }) => {

@@ -10,6 +10,16 @@ import {
 } from 'lucide-react';
 import type { InterestSubmission, StructuredContract } from '../types';
 
+export interface CandidateProfile {
+  id: string;
+  name: string;
+  expectedSalary: string;
+  jobType: string;
+  restDays: string;
+  accommodation: string;
+  language: string;
+}
+
 interface JobPosting {
   id: string;
   employerName: string;
@@ -116,7 +126,6 @@ interface ApplicantMatchProps {
 
 const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
-  const [candidates, setCandidates] = useState<CandidateProfile[]>(INITIAL_DEMO_CANDIDATES);
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
 
   // Modal / Explanation State
@@ -187,59 +196,7 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
     }
   };
 
-  // Rule-Based Matching calculation (identical scoring)
-  const calculateMatch = (candidate: CandidateProfile, job: JobPosting): number => {
-    let score = 0;
 
-    // 1. Job Type matches (30 points)
-    if (job.jobType.toLowerCase() === candidate.jobType.toLowerCase()) {
-      score += 30;
-    }
-
-    // 2. Salary within preferred range (25 points)
-    let minExpectedSalary = 0;
-    if (candidate.expectedSalary === '1500-1800') {
-      minExpectedSalary = 1500;
-    } else if (candidate.expectedSalary === '1800-2200') {
-      minExpectedSalary = 1800;
-    } else if (candidate.expectedSalary === '2200+') {
-      minExpectedSalary = 2200;
-    }
-
-    if (job.salary >= minExpectedSalary) {
-      score += 25;
-    }
-
-    // 3. Rest day matches (15 points)
-    let preferredRestDaysNum = 0;
-    if (candidate.restDays === 'weekly') {
-      preferredRestDaysNum = 4;
-    } else if (candidate.restDays === '2days') {
-      preferredRestDaysNum = 2;
-    }
-
-    if (job.restDays >= preferredRestDaysNum) {
-      score += 15;
-    }
-
-    // 4. Language match (15 points)
-    if (candidate.language) {
-      const prefLangLower = candidate.language.toLowerCase();
-      const jobLangLower = job.languageRequirement.toLowerCase();
-      if (jobLangLower.includes(prefLangLower) || prefLangLower.includes(jobLangLower)) {
-        score += 15;
-      }
-    } else {
-      score += 15;
-    }
-
-    // 5. Accommodation match (15 points)
-    if (job.accommodation.toLowerCase() === candidate.accommodation.toLowerCase()) {
-      score += 15;
-    }
-
-    return score;
-  };
 
   const getMatchedCandidates = () => {
     if (!selectedJob) return [];
