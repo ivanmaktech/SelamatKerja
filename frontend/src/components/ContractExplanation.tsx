@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { UploadCloud, CheckCircle2, AlertTriangle, Copy } from 'lucide-react';
+import { UploadCloud, CheckCircle2, Copy } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type ContractFields = {
   salary: string | null;
@@ -125,115 +127,145 @@ export default function ContractExplanation(): JSX.Element {
   );
 }
 
-// Helpers
-const parseBoldSegments = (text: string): React.ReactNode[] => {
-  const parts: React.ReactNode[] = [];
-  const regex = /\*\*(.+?)\*\*/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(text)) !== null) {
-    const [full, inner] = match;
-    const idx = match.index;
-    if (idx > lastIndex) parts.push(text.slice(lastIndex, idx));
-    parts.push(
-      <strong key={idx} className="font-semibold">
-        {inner}
-      </strong>
-    );
-    lastIndex = idx + full.length;
-  }
-  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
-  return parts.length ? parts : [text];
+// Render a clean, human-readable red flags block. Accepts an array of strings.
+const renderRedFlagsBlock = (flags: string[]) => {
+  return (
+    <div className="border-l-4 border-red-300 bg-red-50 p-4 rounded">
+      <h4 className="text-base font-semibold mb-2 text-red-700">Red Flags (human-readable)</h4>
+      <div className="space-y-2 text-sm text-gray-800">
+        {flags.map((f, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="mt-1.5 w-2 h-2 rounded-full bg-red-600 flex-shrink-0" />
+            <div className="flex-1 leading-relaxed text-gray-800">{f}</div>
+            <button
+              onClick={async () => {
+                try {
+                  // extract plain text from React elements if needed, but 'f' is a string here
+                  await navigator.clipboard.writeText(f);
+                } catch (e) {
+                  console.warn('copy failed', e);
+                }
+              }}
+              aria-label="Copy red flag"
+              className="ml-2 text-gray-500 hover:text-red-700"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const renderFormattedAiSuggestions = (raw: string) => {
-  const lines = raw
-    .split('\n')
-    .map((l) => l.replace('\t', ' ').trim())
-    .filter((l) => l && !/^\u2022$/.test(l));
+  // Try to parse structured JSON arrays first
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length) {
+      if (typeof parsed[0] === 'object' && parsed.every((p: any) => p && (p.type === 'red-flag' || p.type === 'red_flag' || p.type === 'warning' || p.severity))) {
+        const items = (parsed as any[]).map((o) => (o.title ? `${o.title}${o.detail ? ': ' + o.detail : ''}` : o.detail || JSON.stringify(o)));
+        return renderRedFlagsBlock(items);
+      }
+      // If it's just an array of strings
+      return renderListFromStrings(parsed.map(String));
+    }
+  } catch (e) {
+    // not JSON — continue with string parsing
+  }
 
+  // Ensure raw is always a string
+  const validRaw = typeof raw === 'string' ? raw : String(raw);
+
+  // Extract verdict line if present
   let verdict: string | null = null;
-  const items: string[] = [];
-  let current: string | null = null;
-
-  for (const rawLine of lines) {
-    if (!rawLine) continue;
-    const plain = rawLine.replace(/\*\*/g, '').trim();
-    const verdictMatch = plain.match(/verdict\s*:?\s*(.*)/i);
+  const remainingLines: string[] = [];
+  
+  const lines = validRaw.split('\n');
+  for (const line of lines) {
+    const verdictMatch = line.match(/verdict\s*:?\s*(.*)/i);
     if (!verdict && verdictMatch) {
       verdict = verdictMatch[1].trim() || null;
-      continue;
+    } else {
+      remainingLines.push(line);
     }
-
-    if (/^[\-\*\u2022\•]\s+/.test(rawLine)) {
-      if (current) items.push(current.trim());
-      current = rawLine.replace(/^[\-\*\u2022\•]\s+/, '').trim();
-      continue;
-    }
-
-    if (/:/.test(rawLine) && !current) {
-      items.push(rawLine.trim());
-      continue;
-    }
-
-    if (current) current += ' ' + rawLine.trim();
-    else items.push(rawLine.trim());
   }
-  if (current) items.push(current.trim());
-
-  const elems: React.ReactNode[] = [];
-  if (verdict) {
-    const v = verdict.trim();
-    const vLower = v.toLowerCase();
-    const badge = vLower.includes('good') ? 'bg-green-100 text-green-800' : vLower.includes('red') ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
-
-    elems.push(
-      <div key="verdict" className="mb-4">
-        <span className="text-xs text-gray-500 uppercase">Verdict</span>
-        <div className={`mt-2 inline-block px-3 py-1 rounded-full ${badge} font-semibold`}>{v}</div>
-      </div>
-    );
-  }
-
-  const listItems = items
-    .map((it) => it.replace(/^\u2022\s*/, '').replace(/^[\-\*]\s*/, '').trim())
-    .filter((it) => it && it !== '-' && it !== '*' && it !== '•')
-    .map((text, idx) => {
-      const t = text.replace(/^[\-\*\u2022\•]\s*/, '').trim();
-      const isRedFlag = /red flag|red-flag/i.test(t);
-
-      const content = t.includes(':') ? (
-        (() => {
-          const [label, rest] = t.split(':').map((s) => s.trim());
-          return (
-            <div className="text-gray-800 leading-relaxed">
-              <strong className="font-semibold">{label}:</strong> {rest}
-            </div>
-          );
-        })()
-      ) : /\*\*/.test(t) ? (
-        <div className="text-gray-800 leading-relaxed">{parseBoldSegments(t)}</div>
-      ) : (
-        <div className="text-gray-800 leading-relaxed">{t}</div>
-      );
-
-      return (
-        <li key={idx} className="mb-3">
-          <div className="flex items-start gap-3">
-            <span className={`mt-1 w-2 h-2 rounded-full ${isRedFlag ? 'bg-red-600' : 'bg-gray-300'}`} />
-            <div className="flex-1">{isRedFlag ? <div className="text-red-800">{content}</div> : content}</div>
+  
+  const text = remainingLines.join('\n').trim();
+  
+  return (
+    <div>
+      {verdict && (
+        <div className="mb-4">
+          <span className="text-xs text-gray-500 uppercase">Verdict</span>
+          <div className={`mt-2 inline-block px-3 py-1 rounded-full ${verdict.toLowerCase().includes('good') ? 'bg-green-100 text-green-800' : verdict.toLowerCase().includes('red') ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'} font-semibold`}>
+            {verdict}
           </div>
-        </li>
-      );
-    });
+        </div>
+      )}
 
-  if (listItems.length) elems.push(
-    <ul key="list" className="list-disc list-inside space-y-1">
-      {listItems}
-    </ul>
+      <div className="space-y-2">
+         <ReactMarkdown 
+           remarkPlugins={[remarkGfm]}
+           components={{
+             ul: ({ children }) => <ul className="list-none m-0 p-0 space-y-3">{children}</ul>,
+             ol: ({ children }) => <ol className="list-decimal list-inside m-0 p-0 space-y-3">{children}</ol>,
+             li: ({ children }) => {
+               // Render each bullet point as inline, the parent wrapper will give it layout
+               return (
+                  <li className="flex items-start gap-3">
+                    <span className="mt-1.5 w-2 h-2 rounded-full bg-black flex-shrink-0" />
+                    <div className="flex-1 text-gray-800 leading-relaxed">
+                      {children}
+                    </div>
+                  </li>
+               );
+             }
+           }}
+         >
+           {text}
+         </ReactMarkdown>
+      </div>
+    </div>
   );
-
-  return <>{elems}</>;
 };
 
-// (component exported above)
+function renderListFromStrings(items: string[]) {
+  const cleanItems = items
+    .map(it => it.replace(/^[\-\*\u2022\•]\s+/, '').trim())
+    .filter(Boolean);
+
+  return (
+    <ul className="list-none space-y-3">
+      {cleanItems.map((it, idx) => (
+        <li key={idx} className="flex items-start gap-3">
+          <span className="mt-1.5 w-2 h-2 rounded-full bg-black flex-shrink-0" />
+          <div className="flex-1 text-gray-800 leading-relaxed">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                ul: ({ children }) => <ul className="list-none m-0 p-0 space-y-2">{children}</ul>,
+                li: ({ children }) => <li className="inline">{children}</li>,
+              }}
+            >
+              {it}
+            </ReactMarkdown>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(it);
+              } catch (e) {
+                console.warn('copy failed', e);
+              }
+            }}
+            aria-label="Copy"
+            className="ml-2 text-gray-400 hover:text-gray-700"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
