@@ -8,7 +8,7 @@ import {
   User,
   Sliders
 } from 'lucide-react';
-import type { InterestSubmission, StructuredContract } from '../types';
+import type { InterestSubmission } from '../types';
 
 export interface CandidateProfile {
   id: string;
@@ -86,37 +86,7 @@ const INITIAL_DEMO_JOBS: JobPosting[] = [
     accommodation: 'Live-in',
     deductions: 0,
     jobDescription: 'General cleaning of double-storey house. Ironing, laundry, and assisting with food preparation.',
-    languageRequirement: 'English / Cantonese',
-  },
-];
-
-const INITIAL_DEMO_CANDIDATES: CandidateProfile[] = [
-  {
-    id: 'candidate-1',
-    name: 'Siti Rahma',
-    expectedSalary: '1800-2200',
-    jobType: 'childcare',
-    restDays: 'weekly',
-    accommodation: 'Live-in',
-    language: 'Malay/Indonesian',
-  },
-  {
-    id: 'candidate-2',
-    name: 'Dewi Utami',
-    expectedSalary: '1500-1800',
-    jobType: 'housekeeping',
-    restDays: 'weekly',
-    accommodation: 'Live-in',
-    language: 'English',
-  },
-  {
-    id: 'candidate-3',
-    name: 'Ratna Sari',
-    expectedSalary: '2200+',
-    jobType: 'cooking',
-    restDays: '2days',
-    accommodation: 'Live-out',
-    language: 'Malay',
+    languageRequirement: 'English / Cantonese'
   },
 ];
 

@@ -151,7 +151,7 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
                   <Route path="/contracts" element={
                     <PendingContracts
                       userName={user.kakakProfile?.name ?? user.email}
-                      preferences={kakakPrefs}
+                      preferences={user.kakakProfile || null}
                     />
                   } />
                   <Route path="/settings" element={
