@@ -20,6 +20,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default app;
+module.exports = app;
 // Trigger restart
 
 // Trigger restart 2
