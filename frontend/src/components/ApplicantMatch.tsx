@@ -325,9 +325,8 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
   };
 
   const getEmployerJobs = () => {
-    // For Hackathon Demo: return all jobs so the employer can see the mock data
-    // even if they logged in with a custom name.
-    return jobs;
+    const employerJobs = jobs.filter(job => job.employerName === employerName);
+    return employerJobs.length > 0 ? employerJobs : jobs;
   };
 
   const handleSendContract = async () => {
@@ -372,8 +371,8 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
       <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 flex items-start space-x-3 text-purple-900 shadow-sm">
         <Info className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs leading-relaxed font-medium">
-          <span className="font-bold block mb-0.5 text-purple-950">Decision Support System Notice</span>
-          KakakSafe helps employers identify how candidate expectations align with job listings. We assist in spotting expectations mismatches early to support successful employment pairings.
+          <span className="font-bold block mb-0.5 text-purple-950">Interest Inbox</span>
+          Review who sent interest for each job, compare expectations, and draft a contract from the selected worker profile.
         </div>
       </div>
 
@@ -407,7 +406,7 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
       {selectedJob && (
         <div className="space-y-3">
           <h4 className="font-bold text-gray-900 text-sm px-1 flex items-center justify-between">
-            <span>Candidate Alignment Scores ({getMatchedCandidates().length})</span>
+            <span>Interested Workers ({getMatchedCandidates().length})</span>
             <span className="text-xs font-medium text-gray-500">Sorted by score</span>
           </h4>
 

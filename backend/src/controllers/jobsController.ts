@@ -264,9 +264,39 @@ export const submitInterest = async (req: Request, res: Response) => {
 
 export const getEmployerInterests = async (req: Request, res: Response) => {
     try {
-        // For the hackathon MVP demo, we want the employer to see ALL mock interested candidates
-        // to ensure the demo works seamlessly regardless of login name.
-        const result = await db.query('SELECT * FROM interested_submissions');
+        const employerName = req.params.employerName;
+
+        if (!employerName) {
+            const result = await db.query('SELECT * FROM interested_submissions ORDER BY timestamp DESC');
+
+            const interests = result.rows.map(r => ({
+                id: r.id,
+                jobId: r.job_id,
+                kakakName: r.kakak_name,
+                country: r.country,
+                matchPercentage: r.match_percentage,
+                expectedSalary: r.expected_salary,
+                jobTypePref: r.job_type_pref,
+                restDaysPref: r.rest_days_pref,
+                timestamp: r.timestamp
+            }));
+
+            res.json({ interests });
+            return;
+        }
+
+        const employerJobs = await db.query(
+            'SELECT id FROM jobs WHERE employer_name = $1',
+            [employerName]
+        );
+
+        const jobIds = employerJobs.rows.map(row => row.id);
+        const result = jobIds.length > 0
+            ? await db.query(
+                'SELECT * FROM interested_submissions WHERE job_id = ANY($1::text[]) ORDER BY timestamp DESC',
+                [jobIds]
+            )
+            : await db.query('SELECT * FROM interested_submissions ORDER BY timestamp DESC');
         
         const interests = result.rows.map(r => ({
             id: r.id,

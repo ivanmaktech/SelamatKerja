@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { 
   PlusCircle, 
   X,
-  ShieldCheck
+  ShieldCheck,
+  Users,
+  ChevronRight
 } from 'lucide-react';
-import type { EmployerProfile } from '../types';
+import type { EmployerProfile, InterestSubmission } from '../types';
 
 interface JobPosting {
   id: string;
@@ -83,8 +86,10 @@ interface EmployerDashboardProps {
 }
 
 const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, employerProfile }) => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [showAddJobModal, setShowAddJobModal] = useState<boolean>(false);
+  const [interests, setInterests] = useState<InterestSubmission[]>([]);
   
   // Job Form State
   const [newJobType, setNewJobType] = useState<string>('childcare');
@@ -99,6 +104,10 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
     fetchJobs();
   }, [employerName]);
 
+  useEffect(() => {
+    fetchInterests();
+  }, [employerName]);
+
   const fetchJobs = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs`);
@@ -107,6 +116,17 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
       }
     } catch (error) {
       console.warn('Backend server offline. Utilizing mock job list.', error);
+    }
+  };
+
+  const fetchInterests = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/employers/${encodeURIComponent(employerName)}/interests`);
+      if (response.data.interests) {
+        setInterests(response.data.interests);
+      }
+    } catch (error) {
+      console.warn('Backend server offline. Utilizing empty interest inbox.', error);
     }
   };
 
@@ -235,6 +255,62 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               <span>💵</span>
               <span className="font-semibold">{employerProfile.showRecruitmentFee ? 'Fee visible to candidates' : 'Fee not disclosed'}</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-5 shadow-lg flex items-start justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-purple-100">
+            <Users className="w-3.5 h-3.5" />
+            <span>Interest Inbox</span>
+          </div>
+          <h4 className="text-base font-bold">See who sent interest and send a contract from there.</h4>
+          <p className="text-xs text-purple-100 max-w-xl">
+            {interests.length > 0
+              ? `${interests.length} interested worker${interests.length === 1 ? '' : 's'} are waiting for review.`
+              : 'No interest yet. Once a worker responds, their profile appears here and in the matching inbox.'}
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/interests')}
+          className="shrink-0 inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-white text-purple-700 text-xs font-bold shadow-sm hover:bg-purple-50 transition-colors"
+        >
+          <span>Open Inbox</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {interests.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-gray-900 text-sm">Latest interested workers</h4>
+              <p className="text-xs text-gray-500">Open the inbox to review the full list and draft a contract.</p>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 bg-purple-50 border border-purple-100 px-2 py-1 rounded-full">
+              {interests.length}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {interests.slice(0, 3).map(interest => {
+              const job = jobs.find(item => item.id === interest.jobId);
+              return (
+                <div key={interest.id} className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{interest.kakakName}</p>
+                    <p className="text-[11px] text-gray-500 truncate">
+                      {job ? getJobTypeLabel(job.jobType) : 'Job interest'} · {interest.country}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-bold text-purple-700">{interest.matchPercentage}%</p>
+                    <p className="text-[10px] text-gray-400">match</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

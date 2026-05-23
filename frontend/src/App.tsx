@@ -169,11 +169,12 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
                       employerProfile={user.employerProfile}
                     />
                   } />
-                  <Route path="/candidates" element={
+                  <Route path="/interests" element={
                     <ApplicantMatch
                       employerName={user.employerProfile?.name ?? user.email}
                     />
                   } />
+                  <Route path="/candidates" element={<Navigate to="/interests" replace />} />
                   <Route path="/contract-tools" element={
                     <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
                       <ContractExplanation />

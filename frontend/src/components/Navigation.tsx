@@ -66,9 +66,9 @@ const Navigation: React.FC<NavigationProps> = ({ role }) => {
                             <Briefcase className="w-4 h-4 mr-2.5 flex-shrink-0" />
                             <span className="whitespace-nowrap">My Jobs</span>
                         </NavLink>
-                        <NavLink to="/candidates" className={navItemClass}>
+                        <NavLink to="/interests" className={navItemClass}>
                             <Users className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Candidate Match</span>
+                            <span className="whitespace-nowrap">Interest Inbox</span>
                         </NavLink>
                         <NavLink to="/contract-tools" className={navItemClass}>
                             <FileCheck className="w-4 h-4 mr-2.5 flex-shrink-0" />
@@ -87,4 +87,4 @@ const Navigation: React.FC<NavigationProps> = ({ role }) => {
 };
 
 export default Navigation;
-
+
