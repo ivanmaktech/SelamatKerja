@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { LogOut, ShieldCheck } from 'lucide-react';
+import type { User, KakakProfile, EmployerProfile } from './types';
+
 import Navigation from './components/Navigation';
 import ContractExplanation from './components/ContractExplanation';
 import FeeChecker from './components/FeeChecker';
@@ -9,48 +11,62 @@ import JobMatcher from './components/JobMatcher';
 import ApplicantMatch from './components/ApplicantMatch';
 import EmployerDashboard from './components/EmployerDashboard';
 import Login from './components/Login';
+import KakakOnboarding from './components/KakakOnboarding';
+import EmployerOnboarding from './components/EmployerOnboarding';
 
-interface User {
-  role: 'kakak' | 'employer';
-  name: string;
-  email: string;
-}
+type AppState = 'login' | 'onboarding' | 'app';
 
+// ─────────────────────────────────────────────
+// Inner shell (must be inside Router)
+// ─────────────────────────────────────────────
 function AppShell({ user, onLogout }: { user: User; onLogout: () => void }) {
   const navigate = useNavigate();
 
-  // When role changes, navigate to the root home page
   useEffect(() => {
     navigate('/');
   }, [user.role]);
 
+  const kakakPrefs = user.kakakProfile
+    ? {
+        expectedSalary: user.kakakProfile.expectedSalary,
+        // Use the first selected job type for single-type scoring; pass all for UI
+        jobType: user.kakakProfile.jobTypes[0] ?? 'childcare',
+        jobTypes: user.kakakProfile.jobTypes,
+        restDays: user.kakakProfile.restDays === 'flexible' ? '2days' : user.kakakProfile.restDays,
+        accommodation: user.kakakProfile.accommodation === 'provided'
+          ? 'Live-in'
+          : user.kakakProfile.accommodation === 'must-private'
+          ? 'Live-in'
+          : 'Live-out',
+        language: user.kakakProfile.language === 'None' ? undefined : user.kakakProfile.language,
+      }
+    : undefined;
+
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-10 bg-gray-50">
-      {/* ===== APP HEADER ===== */}
+      {/* ===== HEADER ===== */}
       <header className="w-full max-w-lg mb-5 px-4">
         <div className="flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
-          {/* Brand */}
           <div className="flex items-center space-x-2">
             <div className={`p-1.5 rounded-lg ${user.role === 'kakak' ? 'bg-blue-100' : 'bg-purple-100'}`}>
               <ShieldCheck className={`w-4 h-4 ${user.role === 'kakak' ? 'text-blue-700' : 'text-purple-700'}`} />
             </div>
             <div>
-              <span className="font-extrabold text-gray-900 text-sm tracking-tight">SelamatKerja</span>
+              <span className="font-extrabold text-gray-900 text-sm tracking-tight">KakakSafe</span>
               <span className={`ml-2 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full ${
-                user.role === 'kakak' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-purple-100 text-purple-700'
+                user.role === 'kakak' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
               }`}>
                 {user.role === 'kakak' ? 'Worker' : 'Employer'}
               </span>
             </div>
           </div>
 
-          {/* User greeting + logout */}
           <div className="flex items-center space-x-3">
             <div className="text-right hidden sm:block">
               <p className="text-[10px] text-gray-400 font-medium">Welcome back</p>
-              <p className="text-xs font-bold text-gray-800 leading-none">{user.name}</p>
+              <p className="text-xs font-bold text-gray-800 leading-none">
+                {user.kakakProfile?.name ?? user.employerProfile?.name ?? user.email.split('@')[0]}
+              </p>
             </div>
             <button
               onClick={onLogout}
@@ -62,9 +78,45 @@ function AppShell({ user, onLogout }: { user: User; onLogout: () => void }) {
             </button>
           </div>
         </div>
+
+        {/* Concerns banner for Kakak */}
+        {user.role === 'kakak' && user.kakakProfile && (
+          <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+            {user.kakakProfile.wantsClearSalary && (
+              <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">💰 Clear salary</span>
+            )}
+            {user.kakakProfile.prefersLowFees && (
+              <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📉 Low fees</span>
+            )}
+            {user.kakakProfile.wantsWeeklyRest && (
+              <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">🌿 Weekly rest</span>
+            )}
+            {user.kakakProfile.country && (
+              <span className="text-[9px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-full">🌏 {user.kakakProfile.country}</span>
+            )}
+          </div>
+        )}
+
+        {/* Transparency badges for Employer */}
+        {user.role === 'employer' && user.employerProfile && (
+          <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+            {user.employerProfile.contractAvailable && (
+              <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">📄 Contract available</span>
+            )}
+            {user.employerProfile.passportPolicy === 'worker-holds' && (
+              <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✅ Worker holds passport</span>
+            )}
+            {user.employerProfile.overtimePolicy === 'paid' && (
+              <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">💵 Paid overtime</span>
+            )}
+            {user.employerProfile.location && (
+              <span className="text-[9px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📍 {user.employerProfile.location}</span>
+            )}
+          </div>
+        )}
       </header>
 
-      {/* ===== ROLE-BASED NAVIGATION ===== */}
+      {/* ===== NAVIGATION ===== */}
       <Navigation role={user.role} />
 
       {/* ===== MAIN CONTENT ===== */}
@@ -75,22 +127,34 @@ function AppShell({ user, onLogout }: { user: User; onLogout: () => void }) {
               <Route path="/" element={<ContractExplanation />} />
               <Route path="/fee-checker" element={<FeeChecker />} />
               <Route path="/assistant" element={<RightsAssistant />} />
-              <Route path="/matching" element={<JobMatcher userName={user.name} />} />
-              {/* Redirect any employer routes back to home */}
+              <Route path="/matching" element={
+                <JobMatcher
+                  userName={user.kakakProfile?.name ?? user.email}
+                  initialPreferences={kakakPrefs}
+                />
+              } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
         ) : (
           <div className="space-y-4">
             <Routes>
-              <Route path="/" element={<EmployerDashboard employerName={user.name} />} />
-              <Route path="/candidates" element={<ApplicantMatch employerName={user.name} />} />
+              <Route path="/" element={
+                <EmployerDashboard
+                  employerName={user.employerProfile?.name ?? user.email}
+                  employerProfile={user.employerProfile}
+                />
+              } />
+              <Route path="/candidates" element={
+                <ApplicantMatch
+                  employerName={user.employerProfile?.name ?? user.email}
+                />
+              } />
               <Route path="/contract-tools" element={
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                   <ContractExplanation />
                 </div>
               } />
-              {/* Redirect any kakak routes back to employer home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
@@ -100,18 +164,44 @@ function AppShell({ user, onLogout }: { user: User; onLogout: () => void }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// Root App
+// ─────────────────────────────────────────────
 function App() {
+  const [appState, setAppState] = useState<AppState>('login');
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (loggedInUser: User) => {
-    setUser(loggedInUser);
+  const handleLogin = (loginData: { role: 'kakak' | 'employer'; name: string; email: string }) => {
+    const newUser: User = { role: loginData.role, email: loginData.email };
+    setPendingUser(newUser);
+    setAppState('onboarding');
+  };
+
+  const handleKakakOnboardingComplete = (profile: KakakProfile) => {
+    if (!pendingUser) return;
+    const completeUser: User = { ...pendingUser, kakakProfile: profile };
+    setUser(completeUser);
+    setPendingUser(null);
+    setAppState('app');
+  };
+
+  const handleEmployerOnboardingComplete = (profile: EmployerProfile) => {
+    if (!pendingUser) return;
+    const completeUser: User = { ...pendingUser, employerProfile: profile };
+    setUser(completeUser);
+    setPendingUser(null);
+    setAppState('app');
   };
 
   const handleLogout = () => {
     setUser(null);
+    setPendingUser(null);
+    setAppState('login');
   };
 
-  if (!user) {
+  // ── LOGIN SCREEN ──
+  if (appState === 'login') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 flex items-center justify-center p-4 md:p-8">
         <Login onLogin={handleLogin} />
@@ -119,11 +209,31 @@ function App() {
     );
   }
 
-  return (
-    <Router>
-      <AppShell user={user} onLogout={handleLogout} />
-    </Router>
-  );
+  // ── ONBOARDING SCREEN ──
+  if (appState === 'onboarding' && pendingUser) {
+    // Extract default name from email for pre-fill
+    const defaultName = pendingUser.email.split('@')[0]
+      .replace(/[._]/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+
+    if (pendingUser.role === 'kakak') {
+      return <KakakOnboarding defaultName={defaultName} onComplete={handleKakakOnboardingComplete} />;
+    } else {
+      return <EmployerOnboarding defaultName={defaultName} onComplete={handleEmployerOnboardingComplete} />;
+    }
+  }
+
+  // ── APP SCREEN ──
+  if (appState === 'app' && user) {
+    return (
+      <Router>
+        <AppShell user={user} onLogout={handleLogout} />
+      </Router>
+    );
+  }
+
+  // Fallback — should never reach here
+  return null;
 }
 
 export default App;

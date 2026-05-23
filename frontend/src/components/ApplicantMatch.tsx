@@ -304,7 +304,7 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
         <Info className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs leading-relaxed font-medium">
           <span className="font-bold block mb-0.5 text-purple-950">Decision Support System Notice</span>
-          SelamatKerja helps employers identify how candidate expectations align with job listings. We assist in spotting expectations mismatches early to support successful employment pairings.
+          KakakSafe helps employers identify how candidate expectations align with job listings. We assist in spotting expectations mismatches early to support successful employment pairings.
         </div>
       </div>
 

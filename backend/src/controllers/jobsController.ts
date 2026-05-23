@@ -118,6 +118,8 @@ let jobsDatabase: JobPosting[] = [
         jobDescription: 'General cleaning of double-storey house. Ironing, laundry, and assisting with food preparation.',
         languageRequirement: 'English / Cantonese',
     },
+];
+
 // Get all candidates
 export const getCandidates = async (req: Request, res: Response): Promise<void> => {
     try {

@@ -98,9 +98,17 @@ const DEMO_PREFERENCES_SITI: KakakPreferences = {
 
 interface JobMatcherProps {
   userName: string;
+  initialPreferences?: {
+    expectedSalary: string;
+    jobType: string;
+    jobTypes?: string[];
+    restDays: string;
+    accommodation: string;
+    language?: string;
+  };
 }
 
-const JobMatcher: React.FC<JobMatcherProps> = ({ userName }) => {
+const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences }) => {
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [preferences, setPreferences] = useState<KakakPreferences | null>(null);
   const [isOnboarding, setIsOnboarding] = useState(false);
@@ -118,10 +126,25 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName }) => {
   const [prefAccom, setPrefAccom] = useState<string>('Live-in');
   const [prefLang, setPrefLang] = useState<string>('Malay/Indonesian');
 
-  // Load initial jobs and handle demo user context
+  // Load initial jobs; use onboarding preferences if provided, else fall back to demo name match
   useEffect(() => {
     fetchJobs();
-    if (userName === 'Siti Rahma') {
+    if (initialPreferences) {
+      // Pre-fill from onboarding wizard
+      const prefs: KakakPreferences = {
+        expectedSalary: initialPreferences.expectedSalary,
+        jobType: initialPreferences.jobType,
+        restDays: initialPreferences.restDays,
+        accommodation: initialPreferences.accommodation,
+        language: initialPreferences.language,
+      };
+      setPreferences(prefs);
+      setPrefJobType(prefs.jobType);
+      setPrefSalary(prefs.expectedSalary);
+      setPrefRestDays(prefs.restDays);
+      setPrefAccom(prefs.accommodation);
+      setPrefLang(prefs.language ?? 'Malay/Indonesian');
+    } else if (userName === 'Siti Rahma') {
       setPreferences(DEMO_PREFERENCES_SITI);
       setPrefJobType(DEMO_PREFERENCES_SITI.jobType);
       setPrefSalary(DEMO_PREFERENCES_SITI.expectedSalary);
@@ -132,7 +155,8 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName }) => {
       setPreferences(null);
       setIsOnboarding(true);
     }
-  }, [userName]);
+  }, [userName, initialPreferences]);
+
 
   const fetchJobs = async () => {
     try {
@@ -299,7 +323,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName }) => {
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs leading-relaxed font-medium">
           <span className="font-bold block mb-0.5 text-blue-950">Decision Support System Notice</span>
-          SelamatKerja helps domestic workers evaluate how employment terms match their preferences. We do not operate as an agency or hiring platform, nor do we replacement legal channels.
+          KakakSafe helps domestic workers evaluate how employment terms match their preferences. We do not operate as an agency or hiring platform, nor do we replacement legal channels.
         </div>
       </div>
 

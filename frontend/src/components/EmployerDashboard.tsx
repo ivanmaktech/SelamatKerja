@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   PlusCircle, 
-  X 
+  X,
+  ShieldCheck
 } from 'lucide-react';
+import type { EmployerProfile } from '../types';
 
 interface JobPosting {
   id: string;
@@ -77,9 +79,10 @@ const INITIAL_DEMO_JOBS: JobPosting[] = [
 
 interface EmployerDashboardProps {
   employerName: string;
+  employerProfile?: EmployerProfile;
 }
 
-const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName }) => {
+const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, employerProfile }) => {
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [showAddJobModal, setShowAddJobModal] = useState<boolean>(false);
   
@@ -171,7 +174,15 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName }) =
       <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
         <div className="space-y-0.5">
           <h3 className="font-bold text-gray-900 text-base">Employer Dashboard</h3>
-          <p className="text-xs text-gray-500">Managing jobs for: <span className="font-semibold text-purple-700">{employerName}</span></p>
+          <p className="text-xs text-gray-500">
+            <span className="font-semibold text-purple-700">{employerProfile?.name ?? employerName}</span>
+            {employerProfile?.location && <span className="text-gray-400"> · {employerProfile.location}</span>}
+            {employerProfile?.agencyType && (
+              <span className="ml-1 text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                {employerProfile.agencyType === 'private-employer' ? '🏡 Private' : '🏢 Agency'}
+              </span>
+            )}
+          </p>
         </div>
         <button
           onClick={() => setShowAddJobModal(true)}
@@ -181,6 +192,52 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName }) =
           <span>Post a Job</span>
         </button>
       </div>
+
+      {/* Transparency profile panel */}
+      {employerProfile && (
+        <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center space-x-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700">Your Transparency Profile</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
+              employerProfile.contractAvailable ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-gray-100 bg-gray-50 text-gray-500'
+            }`}>
+              <span>📄</span>
+              <span className="font-semibold">{employerProfile.contractAvailable ? 'Contract available' : 'No contract yet'}</span>
+            </div>
+            <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
+              employerProfile.passportPolicy === 'worker-holds' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' :
+              employerProfile.passportPolicy === 'agency-holds' ? 'border-amber-200 bg-amber-50 text-amber-800' :
+              'border-gray-100 bg-gray-50 text-gray-500'
+            }`}>
+              <span>🪪</span>
+              <span className="font-semibold">
+                {employerProfile.passportPolicy === 'worker-holds' ? 'Worker holds passport' :
+                 employerProfile.passportPolicy === 'agency-holds' ? 'Agency holds passport' :
+                 'Passport: to discuss'}
+              </span>
+            </div>
+            <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
+              employerProfile.overtimePolicy === 'paid' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-gray-100 bg-gray-50 text-gray-500'
+            }`}>
+              <span>⏱️</span>
+              <span className="font-semibold">
+                {employerProfile.overtimePolicy === 'paid' ? 'Paid overtime' :
+                 employerProfile.overtimePolicy === 'time-off' ? 'Time off in lieu' :
+                 'Overtime: N/A'}
+              </span>
+            </div>
+            <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
+              employerProfile.showRecruitmentFee ? 'border-purple-200 bg-purple-50 text-purple-800' : 'border-gray-100 bg-gray-50 text-gray-500'
+            }`}>
+              <span>💵</span>
+              <span className="font-semibold">{employerProfile.showRecruitmentFee ? 'Fee visible to candidates' : 'Fee not disclosed'}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* List of active employer jobs */}
       <div className="space-y-3">
