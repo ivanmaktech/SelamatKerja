@@ -24,7 +24,7 @@ const model = 'gemini-2.5-flash';
 
 // Groq (via OpenAI-compatible client)
 const groqBaseUrl = process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1';
-const groqApiKey = process.env.GROQ_API_KEY;
+const groqApiKey = process.env.GROQ_API_KEY || 'fake-groq-key';
 const groqClient = new OpenAI({ apiKey: groqApiKey, baseURL: groqBaseUrl });
 const groqModel = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
