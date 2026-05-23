@@ -1,50 +1,26 @@
 
 import { Request, Response } from 'express';
-import { generateContractExplanation, checkRecruitmentFee, answerRightsQuestion } from '../services/geminiService';
-import fs from 'fs';
-import PDFParser from 'pdf2json';
+import { explainRawContract, checkRecruitmentFee, answerRightsQuestion, suggestContractRedFlags } from '../services/geminiService';
+import { extractContractFields, extractContractText, hasAnyExtractedField } from '../services/contractParsingService';
 
 export const explainContract = async (req: Request, res: Response): Promise<void> => {
     try {
-        let textContent = req.body.text || '';
-        
-        if (req.file && req.file.path) {
-            try {
-                if (req.file.mimetype === 'application/pdf') {
-                    textContent = await new Promise((resolve, reject) => {
-                        const pdfParser = new PDFParser(null, true);
-                        
-                        pdfParser.on('pdfParser_dataError', (errData: any) => {
-                            resolve('Could not cleanly read the PDF. Please try pasting the text instead.');
-                        });
-                        
-                        pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-                            try {
-                                resolve(pdfParser.getRawTextContent().replace(/\r\n/g, ' '));
-                            } catch (e) {
-                                resolve('Could not cleanly read the PDF.');
-                            }
-                        });
-                        
-                        // @ts-ignore
-                        pdfParser.loadPDF(req.file.path);
-                    });
-                }
-            } catch (pdfError) {
-                console.error('PDF Parsing Error:', pdfError);
-                textContent = 'Could not cleanly read the PDF. Please try pasting the text instead.';
-            } finally {
-                // Cleanup
-                try {
-                    if (fs.existsSync(req.file.path)) {
-                        fs.unlinkSync(req.file.path);
-                    }
-                } catch(e) {}
-            }
+        const uploadedText = await extractContractText({
+            text: req.body.text,
+            file: req.file ? { path: req.file.path, mimetype: req.file.mimetype } : null,
+        });
+
+        if (!uploadedText) {
+            res.status(400).json({ success: false, error: 'Could not read the contract. Please upload a clearer image or paste the text.' });
+            return;
         }
 
-        const explanation = await generateContractExplanation(textContent);
-        res.json({ success: true, data: explanation });
+        const extractedFields = extractContractFields(uploadedText);
+        const aiSuggestions = hasAnyExtractedField(extractedFields)
+            ? await suggestContractRedFlags(extractedFields)
+            : await explainRawContract(uploadedText);
+
+        res.json({ success: true, data: aiSuggestions, extracted: extractedFields });
     } catch (error) {
         console.error('Error explaining contract', error);
         res.status(500).json({ success: false, error: 'Failed to process contract' });

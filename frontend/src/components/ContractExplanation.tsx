@@ -2,11 +2,38 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { UploadCloud, CheckCircle2 } from 'lucide-react';
 
+type ContractFields = {
+    salary: string | null;
+    recruitment_fee: string | null;
+    deductions: string | null;
+    working_hours: string | null;
+    rest_day: string | null;
+    employment_duration: string | null;
+    termination_clause: string | null;
+    passport_clause: string | null;
+    accommodation: string | null;
+    penalties: string | null;
+};
+
+const fieldLabels: { key: keyof ContractFields; label: string }[] = [
+    { key: 'salary', label: 'Salary' },
+    { key: 'recruitment_fee', label: 'Recruitment fee' },
+    { key: 'deductions', label: 'Deductions' },
+    { key: 'working_hours', label: 'Working hours' },
+    { key: 'rest_day', label: 'Rest day / leave' },
+    { key: 'employment_duration', label: 'Contract period' },
+    { key: 'termination_clause', label: 'Termination clause' },
+    { key: 'passport_clause', label: 'Passport clause' },
+    { key: 'accommodation', label: 'Accommodation / food' },
+    { key: 'penalties', label: 'Penalties' },
+];
+
 const ContractExplanation: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
     const [textContext, setTextContext] = useState('');
     const [loading, setLoading] = useState(false);
-    const [explanation, setExplanation] = useState('');
+    const [aiSuggestions, setAiSuggestions] = useState('');
+    const [fields, setFields] = useState<ContractFields | null>(null);
 
     const handleExplain = async () => {
         if (!file && !textContext) return;
@@ -20,11 +47,13 @@ const ContractExplanation: React.FC = () => {
             }
             const response = await axios.post('http://localhost:3001/api/explain-contract', formData);
             if (response.data.success) {
-                setExplanation(response.data.data);
+                setAiSuggestions(response.data.data || '');
+                setFields(response.data.extracted || null);
             }
         } catch (error) {
             console.error("Error fetching explanation:", error);
-            setExplanation("Failed to get explanation. Please try again.");
+            setAiSuggestions("Failed to get suggestions. Please try again.");
+            setFields(null);
         } finally {
             setLoading(false);
         }
@@ -40,8 +69,8 @@ const ContractExplanation: React.FC = () => {
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors">
                 <label className="cursor-pointer block">
                     <UploadCloud className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-600 block">Click to upload PDF / Image</span>
-                    <input type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                    <span className="text-sm font-medium text-gray-600 block">Click to upload an image of your contract</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                 </label>
                 {file && <p className="mt-2 text-sm text-green-600 font-medium">Selected: {file.name}</p>}
             </div>
@@ -51,7 +80,7 @@ const ContractExplanation: React.FC = () => {
             <textarea 
                 className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 rows={4}
-                placeholder="Paste contract text here..."
+                placeholder="Paste contract text here if you do not have an image..."
                 value={textContext}
                 onChange={(e) => setTextContext(e.target.value)}
             />
@@ -64,13 +93,31 @@ const ContractExplanation: React.FC = () => {
                 {loading ? 'Analyzing...' : 'Simplify & Explain'}
             </button>
 
-            {explanation && (
+            {fields && (
+                <div className="space-y-3">
+                    <p className="text-xs text-gray-500">
+                        We show the contract as separate fields so you can quickly check salary, duration, rest days, and any unusual terms. If a term is unclear, it stays as Not found.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {fieldLabels.map(({ key, label }) => (
+                        <div key={key} className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
+                            <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+                                {fields[key] || 'Not found'}
+                            </p>
+                        </div>
+                    ))}
+                    </div>
+                </div>
+            )}
+
+            {aiSuggestions && (
                 <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-4">
                     <h3 className="font-semibold text-blue-900 flex items-center mb-2">
-                        <CheckCircle2 className="w-5 h-5 mr-2" /> What this means
+                        <CheckCircle2 className="w-5 h-5 mr-2" /> AI suggestions
                     </h3>
                     <p className="text-sm text-blue-800 whitespace-pre-wrap leading-relaxed">
-                        {explanation}
+                        {aiSuggestions}
                     </p>
                 </div>
             )}
