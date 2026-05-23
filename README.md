@@ -15,14 +15,6 @@ Welcome to SelamatKerja — an assistant and marketplace for domestic workers (K
 
 ---
 
-**Preview**
-
-> Insert a screenshot of the running app here. For example:
-
-![Preview Placeholder](frontend/public/preview.png)
-
----
-
 **Architecture**
 
 ```mermaid
