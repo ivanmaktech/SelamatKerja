@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Send, Bot, Briefcase, MapPin, DollarSign, ChevronRight } from 'lucide-react';
-import { JobPosting } from '../types';
+import type { JobPosting } from '../types';
 import { useNavigate } from 'react-router-dom';
 
 const RightsAssistant: React.FC = () => {
