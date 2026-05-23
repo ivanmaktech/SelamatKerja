@@ -58,22 +58,30 @@ const RightsAssistant: React.FC = () => {
                         <div className={`p-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-white rounded-tr-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
                             {msg.text}
                             {msg.type === 'job_match' && msg.jobs && msg.jobs.length > 0 && (
-                                <div className="mt-3 space-y-2">
+                                <div className="mt-4 flex overflow-x-auto space-x-3 pb-3 scrollbar-hide snap-x">
                                     {msg.jobs.map(job => (
-                                        <div key={job.id} onClick={() => navigate('/matching')} className="bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer hover:border-teal-300 hover:shadow-sm transition-all group">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-bold text-gray-900 group-hover:text-teal-700 transition-colors">{job.jobType}</div>
-                                                    <div className="text-xs text-gray-500 mt-0.5 flex items-center">
-                                                        <MapPin className="w-3 h-3 mr-1" /> {job.employerName}
-                                                    </div>
+                                        <div key={job.id} onClick={() => navigate('/matching')} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group min-w-[220px] max-w-[220px] h-36 flex flex-col justify-between snap-center flex-shrink-0">
+                                            <div>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="font-bold text-gray-900 group-hover:text-teal-700 transition-colors line-clamp-1">{job.jobType}</div>
+                                                    {job.matchPercentage && (
+                                                        <div className="bg-teal-50 text-teal-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded-md flex items-center">
+                                                            {job.matchPercentage}% MATCH
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="bg-teal-50 text-teal-700 text-xs font-bold px-2 py-1 rounded-lg flex items-center">
-                                                    RM {job.salary}
+                                                <div className="text-xs text-gray-500 flex items-center mb-1">
+                                                    <MapPin className="w-3 h-3 mr-1" /> <span className="truncate">{job.employerName}</span>
                                                 </div>
                                             </div>
-                                            <div className="mt-2 text-xs text-teal-600 font-semibold flex items-center">
-                                                View Match Details <ChevronRight className="w-3 h-3 ml-0.5" />
+                                            
+                                            <div className="flex justify-between items-end">
+                                                <div className="text-gray-900 font-extrabold text-sm">
+                                                    RM {job.salary}
+                                                </div>
+                                                <div className="bg-teal-600 text-white p-1.5 rounded-full group-hover:bg-teal-500 transition-colors shadow-sm">
+                                                    <ChevronRight className="w-3.5 h-3.5" />
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

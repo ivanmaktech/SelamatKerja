@@ -38,6 +38,7 @@ export interface JobPosting {
   deductions: number;
   jobDescription: string;
   languageRequirement: string;
+  matchPercentage?: number;
 }
 
 export interface User {
