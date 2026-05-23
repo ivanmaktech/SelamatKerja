@@ -1,0 +1,18 @@
+[
+    {
+        "keywords": ["passport", "keep", "agent", "employer"],
+        "content": "Employers and agents are not legally allowed to keep a worker's passport without their explicit, voluntary consent. If they do, they must provide safe access to it."
+    },
+    {
+        "keywords": ["deduction", "salary", "cut", "pay"],
+        "content": "Salary deductions for recruitment fees, breakages, or mistakes are generally restricted or illegal unless explicitly permitted by law. The worker must be paid the full agreed amount."
+    },
+    {
+        "keywords": ["probation", "contract", "termination", "finish"],
+        "content": "During probation, notice periods might be shorter. If terminated, the contract specifies how many days' notice is required and who pays for the flight home."
+    },
+    {
+        "keywords": ["fee", "charge", "recruit", "pay agent"],
+        "content": "Recruitment fees should be transparent. Hidden fees are common but should always be broken down. Typical fees cover flights, visas, and medical checks, and excessive agency fees are discouraged."
+    }
+]
