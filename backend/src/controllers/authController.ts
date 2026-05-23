@@ -116,3 +116,23 @@ export const me = async (req: Request, res: Response) => {
         res.status(401).json({ error: 'Invalid or expired token' });
     }
 };
+
+export const updateProfile = async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const { profileData } = req.body;
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+        await db.query('UPDATE users SET profile_data = $1 WHERE id = $2', [profileData, decoded.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Update profile error:', err);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+};
