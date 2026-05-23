@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY,
+    email VARCHAR UNIQUE NOT NULL,
+    password_hash VARCHAR NOT NULL,
+    role VARCHAR NOT NULL,
+    name VARCHAR,
+    profile_data JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

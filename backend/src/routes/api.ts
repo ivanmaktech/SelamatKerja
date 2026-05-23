@@ -2,10 +2,18 @@ import { Router } from 'express';
 import multer from 'multer';
 import { explainContract, checkFee, askQuestion, evaluateFairness } from '../controllers/apiController';
 import { getJobs, createJob, explainMatch, getCandidates, submitInterest, getEmployerInterests, submitContract, getKakakContracts } from '../controllers/jobsController';
+import { signup, login, me } from '../controllers/authController';
+import express from 'express';
 
-const router = Router();
+const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// Auth routes
+router.post('/auth/signup', signup);
+router.post('/auth/login', login);
+router.get('/auth/me', me);
+
+// Chatbot routes
 router.post('/explain-contract', upload.single('contract'), (req, res, next) => { explainContract(req, res).catch(next); });
 router.post('/check-fee', (req, res, next) => { checkFee(req, res).catch(next); });
 router.post('/ask', (req, res, next) => { askQuestion(req, res).catch(next); });
