@@ -8,11 +8,22 @@ interface EmployerOnboardingProps {
 }
 
 const LOCATIONS = [
-  { label: '🏙️ Kuala Lumpur', value: 'Kuala Lumpur' },
-  { label: '🌆 Selangor', value: 'Selangor' },
-  { label: '🌴 Penang', value: 'Penang' },
-  { label: '🌊 Johor', value: 'Johor' },
-  { label: '📍 Other', value: 'Other' },
+  { label: 'Johor', value: 'Johor' },
+  { label: 'Kedah', value: 'Kedah' },
+  { label: 'Kelantan', value: 'Kelantan' },
+  { label: 'Melaka', value: 'Melaka' },
+  { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
+  { label: 'Pahang', value: 'Pahang' },
+  { label: 'Perak', value: 'Perak' },
+  { label: 'Perlis', value: 'Perlis' },
+  { label: 'Pulau Pinang', value: 'Pulau Pinang' },
+  { label: 'Sabah', value: 'Sabah' },
+  { label: 'Sarawak', value: 'Sarawak' },
+  { label: 'Selangor', value: 'Selangor' },
+  { label: 'Terengganu', value: 'Terengganu' },
+  { label: 'W.P. Kuala Lumpur', value: 'Kuala Lumpur' },
+  { label: 'W.P. Labuan', value: 'Labuan' },
+  { label: 'W.P. Putrajaya', value: 'Putrajaya' },
 ];
 
 const AGENCY_TYPES = [

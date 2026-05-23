@@ -11,7 +11,7 @@ const FeeChecker: React.FC = () => {
         if (!fee) return;
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:3001/api/check-fee', { fee });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/check-fee`, { fee });
             if (response.data.success) {
                 setResult(response.data.data);
             }

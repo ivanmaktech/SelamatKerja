@@ -7,12 +7,17 @@ interface KakakOnboardingProps {
   onComplete: (profile: KakakProfile) => void;
 }
 
-const COUNTRIES = [
+const APPROVED_COUNTRIES = [
   { label: '🇮🇩 Indonesia', value: 'Indonesia' },
+  { label: '🇹🇭 Thailand', value: 'Thailand' },
+  { label: '🇰🇭 Cambodia', value: 'Cambodia' },
   { label: '🇵🇭 Philippines', value: 'Philippines' },
-  { label: '🇧🇩 Bangladesh', value: 'Bangladesh' },
-  { label: '🇲🇲 Myanmar', value: 'Myanmar' },
-  { label: '🌏 Other', value: 'Other' },
+  { label: '🇱🇰 Sri Lanka', value: 'Sri Lanka' },
+  { label: '🇮🇳 India', value: 'India' },
+  { label: '🇻🇳 Vietnam', value: 'Vietnam' },
+  { label: '🇱🇦 Laos', value: 'Laos' },
+  { label: '🇳🇵 Nepal', value: 'Nepal' },
+  { label: '🌏 Others', value: 'Others' },
 ];
 
 const SALARY_RANGES = [
@@ -20,6 +25,25 @@ const SALARY_RANGES = [
   { label: 'RM 1,500–1,800', value: '1500-1800' },
   { label: 'RM 1,800–2,200', value: '1800-2200' },
   { label: 'RM 2,200+', value: '2200+' },
+];
+
+const LOCATIONS = [
+  { label: 'Johor', value: 'Johor' },
+  { label: 'Kedah', value: 'Kedah' },
+  { label: 'Kelantan', value: 'Kelantan' },
+  { label: 'Melaka', value: 'Melaka' },
+  { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
+  { label: 'Pahang', value: 'Pahang' },
+  { label: 'Perak', value: 'Perak' },
+  { label: 'Perlis', value: 'Perlis' },
+  { label: 'Pulau Pinang', value: 'Pulau Pinang' },
+  { label: 'Sabah', value: 'Sabah' },
+  { label: 'Sarawak', value: 'Sarawak' },
+  { label: 'Selangor', value: 'Selangor' },
+  { label: 'Terengganu', value: 'Terengganu' },
+  { label: 'W.P. Kuala Lumpur', value: 'Kuala Lumpur' },
+  { label: 'W.P. Labuan', value: 'Labuan' },
+  { label: 'W.P. Putrajaya', value: 'Putrajaya' },
 ];
 
 const JOB_TYPES = [
@@ -56,8 +80,10 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
   // Step 1 — Basic Profile
   const [name, setName] = useState(defaultName);
   const [country, setCountry] = useState('Indonesia');
+  const [otherCountry, setOtherCountry] = useState('');
 
   // Step 2 — Job Preferences
+  const [preferredLocation, setPreferredLocation] = useState('Kuala Lumpur');
   const [expectedSalary, setExpectedSalary] = useState('1500-1800');
   const [jobTypes, setJobTypes] = useState<string[]>(['childcare']);
   const [restDays, setRestDays] = useState('weekly');
@@ -78,7 +104,8 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
   const handleFinish = () => {
     onComplete({
       name: name.trim() || defaultName,
-      country,
+      country: country === 'Others' ? (otherCountry.trim() || 'Others') : country,
+      preferredLocation,
       expectedSalary,
       jobTypes,
       restDays,
@@ -144,10 +171,10 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Country of Origin</label>
                 <div className="flex flex-wrap gap-2">
-                  {COUNTRIES.map(c => (
+                  {APPROVED_COUNTRIES.map(c => (
                     <button
                       key={c.value}
-                      onClick={() => setCountry(c.value)}
+                      onClick={() => { setCountry(c.value); setOtherCountry(''); }}
                       className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                         country === c.value
                           ? 'border-blue-600 bg-blue-50 text-blue-900 shadow-sm'
@@ -158,6 +185,27 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                     </button>
                   ))}
                 </div>
+
+                {/* Others — free text + warning */}
+                {country === 'Others' && (
+                  <div className="space-y-2 pt-1">
+                    <input
+                      type="text"
+                      value={otherCountry}
+                      onChange={e => setOtherCountry(e.target.value)}
+                      placeholder="Please specify your country..."
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                    <div className="flex items-start space-x-2.5 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                      <span className="text-base flex-shrink-0 mt-0.5">⚠️</span>
+                      <div className="text-[11px] text-amber-900 leading-relaxed">
+                        <p className="font-bold mb-0.5">Country may not be approved</p>
+                        <p>Malaysia's Foreign Domestic Helper (FDH) programme currently approves workers from Indonesia, Thailand, Cambodia, Philippines, Sri Lanka, India, Vietnam, Laos, and Nepal only.</p>
+                        <p className="mt-1">If your country is not on this list, you may <span className="font-bold">not be eligible</span> to work as a domestic helper under current regulations. Please check with the nearest Malaysian embassy or a licensed recruitment agency.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -180,6 +228,26 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                       }`}
                     >
                       {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Preferred State / Area</label>
+                <div className="flex flex-wrap gap-2">
+                  {LOCATIONS.map(l => (
+                    <button
+                      key={l.value}
+                      onClick={() => setPreferredLocation(l.value)}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                        preferredLocation === l.value
+                          ? 'border-blue-600 bg-blue-50 text-blue-900 shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {l.label}
                     </button>
                   ))}
                 </div>
@@ -345,33 +413,54 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
         </div>
 
         {/* Navigation Buttons */}
-        <div className="px-6 pb-6 flex space-x-3">
-          {step > 1 && (
-            <button
-              onClick={() => setStep(s => s - 1)}
-              className="flex items-center space-x-1.5 px-4 py-3 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-          )}
-          <button
-            onClick={() => step < TOTAL_STEPS ? setStep(s => s + 1) : handleFinish()}
-            className="flex-1 flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white text-xs font-bold rounded-xl shadow-md transition-all"
-          >
-            {step < TOTAL_STEPS ? (
-              <>
-                <span>Continue</span>
-                <ChevronRight className="w-4 h-4" />
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4" />
-                <span>Find My Jobs →</span>
-              </>
-            )}
-          </button>
-        </div>
+        {(() => {
+          const isBlocked = step === 1 && country === 'Others';
+          return (
+            <div className="px-6 pb-6 space-y-2">
+              {isBlocked && (
+                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                  <span className="text-sm">🚫</span>
+                  <p className="text-[11px] text-red-700 font-semibold leading-snug">
+                    You cannot continue — your country is currently not approved under Malaysia's Foreign Domestic Helper programme.
+                  </p>
+                </div>
+              )}
+              <div className="flex space-x-3">
+                {step > 1 && (
+                  <button
+                    onClick={() => setStep(s => s - 1)}
+                    className="flex items-center space-x-1.5 px-4 py-3 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </button>
+                )}
+                <button
+                  disabled={isBlocked}
+                  onClick={() => !isBlocked && (step < TOTAL_STEPS ? setStep(s => s + 1) : handleFinish())}
+                  className={`flex-1 flex items-center justify-center space-x-2 py-3 text-xs font-bold rounded-xl shadow-md transition-all ${
+                    isBlocked
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white'
+                  }`}
+                >
+                  {step < TOTAL_STEPS ? (
+                    <>
+                      <span>Continue</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Find My Jobs →</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
     </div>
   );

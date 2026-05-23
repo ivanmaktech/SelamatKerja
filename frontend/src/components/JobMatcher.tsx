@@ -110,14 +110,16 @@ interface JobMatcherProps {
 
 const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences }) => {
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
-  const [preferences, setPreferences] = useState<KakakPreferences | null>(null);
-  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [preferences, setPreferences] = useState<KakakPreferences | null>(initialPreferences || null);
+  const [isOnboarding, setIsOnboarding] = useState(!initialPreferences);
   
   // Job Matching Details Modal State
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [matchScore, setMatchScore] = useState<number>(0);
   const [explanation, setExplanation] = useState<string>('');
   const [loadingExplanation, setLoadingExplanation] = useState<boolean>(false);
+  const [interestedJobs, setInterestedJobs] = useState<string[]>([]);
+  const [isSubmittingInterest, setIsSubmittingInterest] = useState(false);
 
   // Onboarding Form States
   const [prefJobType, setPrefJobType] = useState<string>('childcare');
@@ -160,7 +162,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
 
   const fetchJobs = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/jobs');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs`);
       if (response.data.success) {
         setJobs(response.data.data);
       }
@@ -258,6 +260,28 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
       .slice(0, 5); // top 5
   };
 
+  const handleInterest = async () => {
+    if (!selectedJob || !preferences || interestedJobs.includes(selectedJob.id)) return;
+    
+    setIsSubmittingInterest(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs/interest`, {
+        jobId: selectedJob.id,
+        kakakName: userName,
+        country: 'Malaysia', 
+        matchPercentage: matchScore,
+        expectedSalary: preferences.expectedSalary,
+        jobTypePref: preferences.jobType,
+        restDaysPref: preferences.restDays
+      });
+      setInterestedJobs(prev => [...prev, selectedJob.id]);
+    } catch (err) {
+      console.error('Failed to submit interest', err);
+    } finally {
+      setIsSubmittingInterest(false);
+    }
+  };
+
   const generateExplanation = async (job: JobPosting, score: number) => {
     setSelectedJob(job);
     setMatchScore(score);
@@ -267,7 +291,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
     if (!preferences) return;
 
     try {
-      const response = await axios.post('http://localhost:3001/api/explain-match', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/explain-match`, {
         preferences,
         job
       });
@@ -719,12 +743,32 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
               </p>
             </div>
             
-            <button
-              onClick={() => setSelectedJob(null)}
-              className="w-full py-3 bg-gray-150 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold shadow-sm transition-colors text-center block"
-            >
-              Back to Matched List
-            </button>
+            <div className="pt-2 space-y-2">
+              {interestedJobs.includes(selectedJob.id) ? (
+                <button
+                  disabled
+                  className="w-full py-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 transition-colors text-center block flex items-center justify-center space-x-1.5"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Interest Sent! Employer will review.</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleInterest}
+                  disabled={isSubmittingInterest}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all text-center flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmittingInterest ? 'Sending...' : "I'm Interested"}
+                </button>
+              )}
+              
+              <button
+                onClick={() => setSelectedJob(null)}
+                className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-bold transition-colors text-center block"
+              >
+                Back to Matched List
+              </button>
+            </div>
           </div>
         </div>
       )}

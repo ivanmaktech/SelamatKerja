@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.ts",
-    "test:groq": "ts-node scripts/test-groq-fallback.ts"
+    "test:groq": "ts-node scripts/test-groq-fallback.ts",
+    "init-db": "ts-node scripts/initDb.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "openai": "^6.39.0",
     "pdf-parse": "^1.1.1",
     "pdf2json": "^4.0.3",
+    "pg": "^8.21.0",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.9.1",
+    "@types/pg": "^8.20.0",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

@@ -18,7 +18,7 @@ const RightsAssistant: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3001/api/ask', { question: q });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/ask`, { question: q });
             if (response.data.success) {
                 setChat(prev => [...prev, { role: 'bot', text: response.data.data }]);
             }

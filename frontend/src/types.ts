@@ -3,6 +3,7 @@
 export interface KakakProfile {
   name: string;
   country: string; // 'Indonesia' | 'Philippines' | 'Bangladesh' | 'Myanmar' | 'Other'
+  preferredLocation: string; // 'Kuala Lumpur' | 'Selangor' | 'Penang' | 'Johor' | 'Other'
   // Job Preferences (core matching data)
   expectedSalary: string; // '1200-1500' | '1500-1800' | '1800-2200' | '2200+'
   jobTypes: string[];     // multi-select: ['childcare', 'elderly care', 'housekeeping', 'cooking']
@@ -32,4 +33,34 @@ export interface User {
   email: string;
   kakakProfile?: KakakProfile;
   employerProfile?: EmployerProfile;
+}
+
+export interface InterestSubmission {
+  id: string;
+  jobId: string;
+  kakakName: string;
+  country: string;
+  matchPercentage: number;
+  expectedSalary: string;
+  jobTypePref: string;
+  restDaysPref: string;
+  timestamp: string;
+}
+
+export interface StructuredContract {
+  id: string;
+  jobId: string;
+  kakakName: string;
+  employerName: string;
+  salary: string;
+  jobType: string;
+  restDays: string;
+  accommodation: string;
+  deductions: string;
+  duration: string;
+  overtimePolicy: string;
+  passportClause: string;
+  additionalNotes: string;
+  status: 'pending' | 'accepted' | 'declined';
+  timestamp: string;
 }

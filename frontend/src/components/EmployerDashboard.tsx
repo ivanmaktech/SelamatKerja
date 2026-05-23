@@ -101,7 +101,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
 
   const fetchJobs = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/jobs');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs`);
       if (response.data.success) {
         setJobs(response.data.data);
       }
@@ -126,7 +126,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
     };
 
     try {
-      const response = await axios.post('http://localhost:3001/api/jobs', payload);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs`, payload);
       if (response.data.success) {
         setJobs(prev => [...prev, response.data.data]);
       } else {

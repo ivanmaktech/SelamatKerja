@@ -45,7 +45,7 @@ export default function ContractExplanation() {
       if (file) formData.append('contract', file);
       else formData.append('text', textContext);
 
-      const res = await axios.post('http://localhost:3001/api/explain-contract', formData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/explain-contract`, formData);
       if (res.data.success) {
         setAiSuggestions(res.data.data || '');
         setFields(res.data.extracted || null);

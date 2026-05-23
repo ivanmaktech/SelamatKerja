@@ -8,16 +8,7 @@ import {
   User,
   Sliders
 } from 'lucide-react';
-
-interface CandidateProfile {
-  id: string;
-  name: string;
-  expectedSalary: string;
-  jobType: string;
-  restDays: string;
-  accommodation: string;
-  language?: string;
-}
+import type { InterestSubmission, StructuredContract } from '../types';
 
 interface JobPosting {
   id: string;
@@ -133,6 +124,23 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
   const [matchScore, setMatchScore] = useState<number>(0);
   const [explanation, setExplanation] = useState<string>('');
   const [loadingExplanation, setLoadingExplanation] = useState<boolean>(false);
+  const [interests, setInterests] = useState<InterestSubmission[]>([]);
+
+  // Send Contract State
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [contractForm, setContractForm] = useState({
+    salary: '',
+    jobType: '',
+    restDays: '',
+    accommodation: '',
+    deductions: '',
+    duration: '2 Years',
+    overtimePolicy: '',
+    passportClause: 'Worker keeps passport',
+    additionalNotes: ''
+  });
+  const [isSendingContract, setIsSendingContract] = useState(false);
+  const [sentContracts, setSentContracts] = useState<string[]>([]); // Track sent ones by candidate ID
 
   useEffect(() => {
     fetchData();
@@ -142,7 +150,7 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
     // 1. Fetch jobs
     let activeJobs = INITIAL_DEMO_JOBS;
     try {
-      const jobResponse = await axios.get('http://localhost:3001/api/jobs');
+      const jobResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/jobs`);
       if (jobResponse.data.success) {
         setJobs(jobResponse.data.data);
         activeJobs = jobResponse.data.data;
@@ -161,12 +169,21 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
 
     // 2. Fetch candidates
     try {
-      const candidateResponse = await axios.get('http://localhost:3001/api/candidates');
+      const candidateResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/candidates`);
       if (candidateResponse.data.success) {
-        setCandidates(candidateResponse.data.data);
+        // Legacy setCandidates
       }
     } catch (err) {
       console.warn('Backend server offline. Utilizing mock candidate list.', err);
+    }
+
+    try {
+      const interestsRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/employers/${employerName}/interests`);
+      if (interestsRes.data.interests) {
+        setInterests(interestsRes.data.interests);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch interests', err);
     }
   };
 
@@ -227,11 +244,25 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
   const getMatchedCandidates = () => {
     if (!selectedJob) return [];
 
-    return candidates
-      .map(candidate => ({
-        candidate,
-        score: calculateMatch(candidate, selectedJob)
-      }))
+    // Filter interests for the selected job
+    const jobInterests = interests.filter(i => i.jobId === selectedJob.id);
+
+    return jobInterests
+      .map(interest => {
+        // Map InterestSubmission to the format the UI expects for "candidate"
+        return {
+          candidate: {
+            id: interest.id, // Using interest ID as candidate ID proxy for this view
+            name: interest.kakakName,
+            expectedSalary: interest.expectedSalary,
+            jobType: interest.jobTypePref,
+            restDays: interest.restDaysPref,
+            accommodation: 'Any', // Interest doesn't store this yet
+            language: 'Any'
+          },
+          score: interest.matchPercentage
+        };
+      })
       .sort((a, b) => b.score - a.score);
   };
 
@@ -244,7 +275,7 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
     if (!selectedJob) return;
 
     try {
-      const response = await axios.post('http://localhost:3001/api/explain-match', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/explain-match`, {
         preferences: candidate, // Preferences is the candidate profile shape
         job: selectedJob
       });
@@ -294,7 +325,45 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
   };
 
   const getEmployerJobs = () => {
-    return jobs.filter(j => j.employerName === employerName);
+    // For Hackathon Demo: return all jobs so the employer can see the mock data
+    // even if they logged in with a custom name.
+    return jobs;
+  };
+
+  const handleSendContract = async () => {
+    if (!selectedCandidate || !selectedJob) return;
+    setIsSendingContract(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/contracts`, {
+        ...contractForm,
+        jobId: selectedJob.id,
+        kakakName: selectedCandidate.name,
+        employerName: employerName,
+      });
+      setSentContracts([...sentContracts, selectedCandidate.id]);
+      setShowContractModal(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSendingContract(false);
+    }
+  };
+
+  const prepContractForm = () => {
+    if (selectedJob) {
+      setContractForm({
+        salary: selectedJob.salary.toString(),
+        jobType: selectedJob.jobType,
+        restDays: selectedJob.restDays === 4 ? 'Weekly' : `${selectedJob.restDays} days`,
+        accommodation: selectedJob.accommodation,
+        deductions: selectedJob.deductions > 0 ? `RM ${selectedJob.deductions}` : 'None',
+        duration: '2 Years',
+        overtimePolicy: 'Standard Rate',
+        passportClause: 'Worker keeps passport',
+        additionalNotes: selectedJob.jobDescription
+      });
+    }
+    setShowContractModal(true);
   };
 
   return (
@@ -544,11 +613,90 @@ const ApplicantMatch: React.FC<ApplicantMatchProps> = ({ employerName }) => {
               </div>
             </div>
 
+            <div className="pt-2 space-y-2">
+              {sentContracts.includes(selectedCandidate.id) ? (
+                <button
+                  disabled
+                  className="w-full py-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 transition-colors text-center block flex items-center justify-center space-x-1.5"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Contract Sent successfully!</span>
+                </button>
+              ) : (
+                <button
+                  onClick={prepContractForm}
+                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all text-center flex items-center justify-center"
+                >
+                  Draft & Send Contract
+                </button>
+              )}
+              
+              <button
+                onClick={() => setSelectedCandidate(null)}
+                className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-bold transition-colors text-center block"
+              >
+                Back to Candidates
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SEND CONTRACT MODAL */}
+      {showContractModal && selectedCandidate && selectedJob && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60] animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative space-y-5 animate-scale-up">
+            <div className="flex items-start justify-between border-b pb-4">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">Draft Official Contract</h3>
+                <p className="text-xs text-gray-500">Sending to: {selectedCandidate.name}</p>
+              </div>
+              <button onClick={() => setShowContractModal(false)} className="p-1 rounded-full text-gray-400 hover:bg-gray-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700">Salary (RM)</label>
+                  <input type="text" value={contractForm.salary} onChange={e => setContractForm({...contractForm, salary: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700">Job Type</label>
+                  <input type="text" value={contractForm.jobType} onChange={e => setContractForm({...contractForm, jobType: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700">Rest Days</label>
+                  <input type="text" value={contractForm.restDays} onChange={e => setContractForm({...contractForm, restDays: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700">Accommodation</label>
+                  <input type="text" value={contractForm.accommodation} onChange={e => setContractForm({...contractForm, accommodation: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700">Deductions (if any)</label>
+                <input type="text" value={contractForm.deductions} onChange={e => setContractForm({...contractForm, deductions: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700">Passport Clause</label>
+                <input type="text" value={contractForm.passportClause} onChange={e => setContractForm({...contractForm, passportClause: e.target.value})} className="w-full border rounded-xl p-2 text-sm bg-gray-50 border-purple-200" />
+                <p className="text-[10px] text-purple-600 italic">Forcing workers to surrender passports is a major red flag.</p>
+              </div>
+            </div>
+
             <button
-              onClick={() => setSelectedCandidate(null)}
-              className="w-full py-3 bg-gray-150 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold shadow-sm transition-colors text-center block"
+              onClick={handleSendContract}
+              disabled={isSendingContract}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold shadow-md transition-all"
             >
-              Back to Candidates
+              {isSendingContract ? 'Sending...' : 'Confirm & Send Contract'}
             </button>
           </div>
         </div>

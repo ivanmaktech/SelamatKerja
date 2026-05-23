@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { explainRawContract, checkRecruitmentFee, answerRightsQuestion, suggestContractRedFlags } from '../services/geminiService';
 import { extractContractFields, extractContractText, hasAnyExtractedField } from '../services/contractParsingService';
+import { evaluateContractFairness } from '../services/geminiService';
 
 export const explainContract = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -49,3 +50,17 @@ export const askQuestion = async (req: Request, res: Response) => {
     }
 };
 
+export const evaluateFairness = async (req: Request, res: Response) => {
+    try {
+        const { contract, preferences } = req.body;
+        if (!contract || !preferences) {
+            res.status(400).json({ error: 'Missing contract or preferences' });
+            return;
+        }
+        const result = await evaluateContractFairness(contract, preferences);
+        res.json({ success: true, explanation: result });
+    } catch (error) {
+        console.error('Error evaluating fairness', error);
+        res.status(500).json({ success: false, error: 'Failed to evaluate fairness' });
+    }
+};

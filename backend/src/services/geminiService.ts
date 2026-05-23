@@ -270,6 +270,7 @@ Rules:
 4. Keep the tone warm, simple, and encouraging.
 5. Use "✓" for preferences that are met or exceeded (e.g. ✓ Matches childcare preference).
 6. Use "⚠" for preferences that are not met (e.g. ⚠ Lower salary than expected).
+7. VERY IMPORTANT: Write the entire response in the language specified in the worker's preferred language: ${preferences.language || 'English'}. If the preference is "Basic Only" or "None", default to simple Malay/Indonesian.
 
 Format:
 - Bullet 1
@@ -304,4 +305,32 @@ Do not write any introductory or concluding text. Write only the bullet points.
     };
 
     return runWithFallback('explainJobMatch', prompt, localFallback);
+};
+
+export const evaluateContractFairness = async (
+    contract: { salary: string, restDays: string, deductions: string, overtimePolicy: string, passportClause: string },
+    preferences: { expectedSalary: string, restDays: string, language?: string }
+): Promise<string> => {
+    const prompt = `
+You are helping a domestic worker evaluate if a contract aligns with their preferences and is fair.
+Contract details:
+- Salary: ${contract.salary}
+- Rest Days: ${contract.restDays}
+- Deductions: ${contract.deductions}
+- Overtime Policy: ${contract.overtimePolicy}
+- Passport Clause: ${contract.passportClause}
+
+Worker Preferences:
+- Expected Salary: ${preferences.expectedSalary}
+- Preferred Rest Days: ${preferences.restDays}
+
+Rules:
+1. Write a maximum of 2 bullet points (under 20 words total).
+2. Keep it extremely simple, no legal jargon.
+3. Do not repeat the exact text from the contract, just summarize the fairness.
+4. Use "✓" if it aligns well or is fair, use "⚠" if there is a concern (e.g. deductions, unclear overtime, lower salary).
+5. VERY IMPORTANT: Write the entire response in the worker's preferred language: ${preferences.language || 'English'}. If "Basic Only" or "None", default to simple Malay/Indonesian.
+`;
+
+    return runWithFallback('evaluateContractFairness', prompt, () => "✓ Contract received.\n⚠ Please review terms carefully.");
 };
