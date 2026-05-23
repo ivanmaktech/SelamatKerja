@@ -19,9 +19,11 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-export default app;
-module.exports = app;
-// Trigger restart
+import { Request, Response } from 'express';
+
+export default function handler(req: Request, res: Response) {
+    return app(req, res);
+}// Trigger restart
 
 // Trigger restart 2
 
