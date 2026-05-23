@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { queryKnowledgeBase } from './ragService';
 
@@ -19,6 +20,52 @@ type ContractFields = {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'fake-key' });
 const model = 'gemini-2.5-flash';
+
+// Groq (via OpenAI-compatible client)
+const groqBaseUrl = process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1';
+const groqApiKey = process.env.GROQ_API_KEY;
+const groqClient = new OpenAI({ apiKey: groqApiKey, baseURL: groqBaseUrl });
+const groqModel = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+
+const runGroqPrompt = async (prompt: string): Promise<string> => {
+    const groqResp = await groqClient.chat.completions.create({
+        model: groqModel,
+        messages: [{ role: 'user', content: prompt }],
+    });
+
+    const choice = groqResp.choices?.[0];
+    return choice?.message?.content ?? '';
+};
+
+const runWithFallback = async (
+    label: string,
+    prompt: string,
+    fallback: () => string,
+): Promise<string> => {
+    try {
+        const response = await ai.models.generateContent({ model, contents: prompt });
+        return response.text ?? fallback();
+    } catch (geminiErr) {
+        console.error(`Gemini Error (${label}):`, geminiErr);
+
+        try {
+            if (!groqApiKey) {
+                throw new Error('Missing GROQ_API_KEY');
+            }
+
+            const groqText = await runGroqPrompt(prompt);
+            if (groqText) {
+                return groqText;
+            }
+
+            console.warn(`Groq returned an empty response (${label}); using local fallback.`);
+            return fallback();
+        } catch (groqErr) {
+            console.error(`Groq Error (${label}):`, groqErr);
+            return fallback();
+        }
+    }
+};
 
 const buildFallbackAnswer = (context: string) => {
     return `I can't reach the AI model right now, but based on the available guidance: ${context}`;
@@ -88,16 +135,11 @@ ${contractText}
 """
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error("Gemini Error:", error);
-        return "I am sorry, there was an issue understanding the contract. Please try again.";
-    }
+    return runWithFallback(
+        'generateContractExplanation',
+        prompt,
+        () => "I am sorry, there was an issue understanding the contract. Please try again.",
+    );
 };
 
 export const explainExtractedContract = async (fields: ContractFields) => {
@@ -115,16 +157,7 @@ Extracted JSON:
 ${JSON.stringify(fields, null, 2)}
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error('Gemini Contract Summary Error:', error);
-        return buildContractFallbackSummary(fields);
-    }
+    return runWithFallback('explainExtractedContract', prompt, () => buildContractFallbackSummary(fields));
 };
 
 export const suggestContractRedFlags = async (fields: ContractFields) => {
@@ -142,16 +175,7 @@ Extracted JSON:
 ${JSON.stringify(fields, null, 2)}
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error('Gemini Contract Suggestions Error:', error);
-        return buildContractSuggestionFallback(fields);
-    }
+    return runWithFallback('suggestContractRedFlags', prompt, () => buildContractSuggestionFallback(fields));
 };
 
 export const explainRawContract = async (contractText: string) => {
@@ -171,16 +195,11 @@ ${contractText}
 """
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error('Gemini Raw Contract Error:', error);
-        return 'I could not explain the contract right now. Please try a clearer image or paste the contract text.';
-    }
+    return runWithFallback(
+        'explainRawContract',
+        prompt,
+        () => 'I could not explain the contract right now. Please try a clearer image or paste the contract text.',
+    );
 };
 
 export const checkRecruitmentFee = async (fee: string) => {
@@ -195,16 +214,11 @@ Provide:
 - Simple explanation of what they should ask next
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error("Gemini Error:", error);
-        return "I am sorry, I could not verify this fee right now.";
-    }
+    return runWithFallback(
+        'checkRecruitmentFee',
+        prompt,
+        () => "I am sorry, I could not verify this fee right now.",
+    );
 };
 
 export const answerRightsQuestion = async (question: string) => {
@@ -223,14 +237,5 @@ ${ragContext}
 User Question: ${question}
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        });
-        return response.text;
-    } catch (error) {
-        console.error("Gemini Error:", error);
-        return buildFallbackAnswer(ragContext);
-    }
+    return runWithFallback('answerRightsQuestion', prompt, () => buildFallbackAnswer(ragContext));
 };
