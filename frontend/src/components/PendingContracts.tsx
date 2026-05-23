@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FileText, Sparkles, AlertTriangle, CheckCircle, ChevronRight, X, Clock } from 'lucide-react';
 import type { StructuredContract, KakakPreferences } from '../types';
+import { useTranslation } from '../i18n';
 
 interface PendingContractsProps {
   userName: string;
@@ -9,6 +10,7 @@ interface PendingContractsProps {
 }
 
 const PendingContracts: React.FC<PendingContractsProps> = ({ userName, preferences }) => {
+  const { t } = useTranslation();
   const [contracts, setContracts] = useState<StructuredContract[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -83,18 +85,18 @@ const PendingContracts: React.FC<PendingContractsProps> = ({ userName, preferenc
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start space-x-3 text-blue-900 shadow-sm">
         <Clock className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs leading-relaxed font-medium">
-          <span className="font-bold block mb-0.5 text-blue-950">Pending Contracts</span>
-          Review official contract offers from employers. KakakSafe provides both strict rule checks and AI summaries to help you understand the terms before deciding.
+          <span className="font-bold block mb-0.5 text-blue-950">{t('pending.title')}</span>
+          {t('pending.subtitle')}
         </div>
       </div>
 
       <div className="space-y-3">
         {loading ? (
-          <p className="text-gray-500 text-sm py-4 text-center">Loading contracts...</p>
+          <p className="text-gray-500 text-sm py-4 text-center">{t('app.loading')}</p>
         ) : contracts.length === 0 ? (
           <div className="text-center py-8 bg-white border rounded-2xl">
             <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm">No pending contracts right now.</p>
+            <p className="text-gray-500 text-sm">{t('pending.noContracts')}</p>
           </div>
         ) : (
           contracts.map(contract => (
@@ -110,7 +112,7 @@ const PendingContracts: React.FC<PendingContractsProps> = ({ userName, preferenc
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-gray-100">
                 <div>
-                  <span className="text-gray-400 block text-[10px] uppercase font-bold">Salary</span>
+                  <span className="text-gray-400 block text-[10px] uppercase font-bold">{t('pending.salary')}</span>
                   <span className="font-bold text-gray-800">RM {contract.salary}</span>
                 </div>
                 <div>
@@ -201,31 +203,31 @@ const PendingContracts: React.FC<PendingContractsProps> = ({ userName, preferenc
               <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Official Terms</h4>
               <div className="border border-gray-100 rounded-2xl overflow-hidden text-xs">
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Salary</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('pending.salary')}</div>
                   <div className="p-2.5 font-bold text-gray-900">RM {selectedContract.salary}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Job Type</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('employer.jobType')}</div>
                   <div className="p-2.5 font-bold text-gray-900">{selectedContract.jobType}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Rest Days</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('pending.restDays')}</div>
                   <div className="p-2.5 font-bold text-gray-900">{selectedContract.restDays}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Accommodation</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('pending.accommodation')}</div>
                   <div className="p-2.5 font-bold text-gray-900">{selectedContract.accommodation}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Deductions</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('contract.field.deductions')}</div>
                   <div className={`p-2.5 font-bold ${selectedContract.deductions.toLowerCase() !== 'none' ? 'text-red-600' : 'text-gray-900'}`}>{selectedContract.deductions}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr] border-b">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Passport</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('contract.field.passport')}</div>
                   <div className="p-2.5 font-bold text-gray-900">{selectedContract.passportClause}</div>
                 </div>
                 <div className="grid grid-cols-[110px_1fr]">
-                  <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">Overtime</div>
+                <div className="bg-gray-50 p-2.5 font-semibold text-gray-500">{t('settings.overtimePolicy')}</div>
                   <div className="p-2.5 font-bold text-gray-900">{selectedContract.overtimePolicy}</div>
                 </div>
               </div>

@@ -9,6 +9,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import type { EmployerProfile, InterestSubmission } from '../types';
+import { useTranslation } from '../i18n';
 
 interface JobPosting {
   id: string;
@@ -87,6 +88,7 @@ interface EmployerDashboardProps {
 
 const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, employerProfile }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [showAddJobModal, setShowAddJobModal] = useState<boolean>(false);
   const [interests, setInterests] = useState<InterestSubmission[]>([]);
@@ -193,7 +195,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
       {/* Dashboard Sub Header */}
       <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
         <div className="space-y-0.5">
-          <h3 className="font-bold text-gray-900 text-base">Employer Dashboard</h3>
+          <h3 className="font-bold text-gray-900 text-base">{t('employer.dashboard')}</h3>
           <p className="text-xs text-gray-500">
             <span className="font-semibold text-purple-700">{employerProfile?.name ?? employerName}</span>
             {employerProfile?.location && <span className="text-gray-400"> · {employerProfile.location}</span>}
@@ -209,7 +211,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
           className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow flex items-center space-x-1.5 transition-colors"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>Post a Job</span>
+          <span>{t('employer.postJob')}</span>
         </button>
       </div>
 
@@ -218,14 +220,14 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
         <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex items-center space-x-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700">Your Transparency Profile</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700">{t('employer.transparencyProfile')}</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
               employerProfile.contractAvailable ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-gray-100 bg-gray-50 text-gray-500'
             }`}>
               <span>📄</span>
-              <span className="font-semibold">{employerProfile.contractAvailable ? 'Contract available' : 'No contract yet'}</span>
+              <span className="font-semibold">{employerProfile.contractAvailable ? t('employer.contractAvailable') : t('employer.noContractYet')}</span>
             </div>
             <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
               employerProfile.passportPolicy === 'worker-holds' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' :
@@ -234,9 +236,9 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
             }`}>
               <span>🪪</span>
               <span className="font-semibold">
-                {employerProfile.passportPolicy === 'worker-holds' ? 'Worker holds passport' :
-                 employerProfile.passportPolicy === 'agency-holds' ? 'Agency holds passport' :
-                 'Passport: to discuss'}
+                {employerProfile.passportPolicy === 'worker-holds' ? t('employer.workerHoldsPassport') :
+                 employerProfile.passportPolicy === 'agency-holds' ? t('employer.agencyHoldsPassport') :
+                 t('employer.passportToDiscuss')}
               </span>
             </div>
             <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
@@ -244,9 +246,9 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
             }`}>
               <span>⏱️</span>
               <span className="font-semibold">
-                {employerProfile.overtimePolicy === 'paid' ? 'Paid overtime' :
-                 employerProfile.overtimePolicy === 'time-off' ? 'Time off in lieu' :
-                 'Overtime: N/A'}
+                {employerProfile.overtimePolicy === 'paid' ? t('employer.paidOvertime') :
+                 employerProfile.overtimePolicy === 'time-off' ? t('employer.overtimeTimeOff') :
+                 t('employer.overtimeNA')}
               </span>
             </div>
             <div className={`flex items-center space-x-1.5 p-2 rounded-xl border ${
@@ -263,7 +265,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
         <div className="space-y-1.5">
           <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-purple-100">
             <Users className="w-3.5 h-3.5" />
-            <span>Interest Inbox</span>
+            <span>{t('employer.interestInbox')}</span>
           </div>
           <h4 className="text-base font-bold">See who sent interest and send a contract from there.</h4>
           <p className="text-xs text-purple-100 max-w-xl">
@@ -317,11 +319,11 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
 
       {/* List of active employer jobs */}
       <div className="space-y-3">
-        <h4 className="font-bold text-gray-900 text-sm px-1">My Posted Jobs ({getEmployerJobs().length})</h4>
+        <h4 className="font-bold text-gray-900 text-sm px-1">{t('employer.myJobPostings')} ({getEmployerJobs().length})</h4>
         
         {getEmployerJobs().length === 0 ? (
           <p className="text-center py-8 text-gray-400 text-sm bg-white border border-gray-200 rounded-2xl">
-            No jobs posted yet. Click "Post a Job" to get started.
+            {t('employer.noJobsYet')} {t('employer.postFirstJob')}
           </p>
         ) : (
           getEmployerJobs().map(job => (
@@ -355,7 +357,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
           <div className="bg-white rounded-3xl w-full max-w-md max-h-[85vh] overflow-y-auto p-6 shadow-2xl relative space-y-4 animate-scale-up">
             
             <div className="flex items-center justify-between border-b pb-3 mb-1">
-              <h3 className="font-bold text-gray-900 text-lg">Post a Job Listing</h3>
+              <h3 className="font-bold text-gray-900 text-lg">{t('employer.postNewJob')}</h3>
               <button 
                 onClick={() => setShowAddJobModal(false)}
                 className="p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
@@ -376,21 +378,21 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Duties / Job Type</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.jobType')}</label>
                 <select
                   value={newJobType}
                   onChange={(e) => setNewJobType(e.target.value)}
                   className="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
                 >
-                  <option value="childcare">🍼 Childcare</option>
-                  <option value="elderly care">👵 Elderly Care</option>
-                  <option value="housekeeping">🧹 Housekeeping</option>
-                  <option value="cooking">🍳 Cooking</option>
+                  <option value="childcare">{t('employer.childcare')}</option>
+                  <option value="elderly care">{t('employer.elderlyCare')}</option>
+                  <option value="housekeeping">{t('employer.housekeeping')}</option>
+                  <option value="cooking">{t('employer.cooking')}</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Salary (Monthly in RM)</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.monthlySalaryRM')}</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 2100"
@@ -402,7 +404,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Rest Days Per Month</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.restDaysPerMonth')}</label>
                 <select
                   value={newJobRestDays}
                   onChange={(e) => setNewJobRestDays(e.target.value)}
@@ -415,7 +417,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Accommodation Offered</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.accommodationType')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['Live-in', 'Live-out'].map(item => (
                     <button
@@ -435,7 +437,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Salary Deductions (Monthly in RM, if any)</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.monthlyDeductions')}</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 0"
@@ -446,7 +448,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Required Language</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.languageRequired')}</label>
                 <select
                   value={newJobLang}
                   onChange={(e) => setNewJobLang(e.target.value)}
@@ -461,7 +463,7 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Job Description / Requirements</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('employer.jobDescription')}</label>
                 <textarea 
                   rows={3}
                   required
@@ -478,13 +480,13 @@ const EmployerDashboard: React.FC<EmployerDashboardProps> = ({ employerName, emp
                   onClick={() => setShowAddJobModal(false)}
                   className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs transition-colors text-center"
                 >
-                  Cancel
+                  {t('employer.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs shadow transition-colors text-center"
                 >
-                  Publish Job
+                  {t('employer.postJobBtn')}
                 </button>
               </div>
             </form>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { ShieldCheck, UserCheck, Briefcase, Eye, EyeOff, Lock, Mail, UserPlus, LogIn } from 'lucide-react';
+import { useTranslation } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface LoginProps {
   onLogin: (user: { role: 'kakak' | 'employer'; name: string; email: string }) => void;
@@ -15,6 +17,7 @@ const DEMO_EMPLOYERS = [
 type AuthMode = 'login' | 'signup';
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const { t } = useTranslation();
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,10 +39,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
 
-    if (!email.trim()) { setError('Please enter your email.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!email.trim()) { setError(t('login.emailRequired')); return; }
+    if (password.length < 6) { setError(t('login.passwordTooShort')); return; }
     if (authMode === 'signup' && password !== confirmPassword) {
-      setError('Passwords do not match.'); return;
+      setError(t('login.passwordsDoNotMatch')); return;
     }
 
     try {
@@ -57,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         onLogin(response.data.user);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Authentication failed. Please try again.');
+      setError(err.response?.data?.error || t('login.authFailed'));
     }
   };
 
@@ -70,29 +73,34 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="absolute bottom-0 left-0 -mb-14 -ml-14 w-56 h-56 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="space-y-1.5 relative z-10">
-          <div className="flex items-center space-x-2">
-            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
-              <ShieldCheck className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-extrabold tracking-wider text-lg">KakakSafe</span>
             </div>
-            <span className="font-extrabold tracking-wider text-lg">KakakSafe</span>
+            <LanguageSwitcher />
           </div>
           <p className="text-blue-200 text-[10px] font-semibold tracking-widest uppercase">
-            Migrant Worker Decision Support
+            {t('login.tagline')}
           </p>
         </div>
 
         <div className="my-6 md:my-0 space-y-4 relative z-10">
           <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">
-            Support. Match.<br />Protect.
+            {t('login.heroTitle').split('\n').map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
           </h2>
           <p className="text-sm text-blue-100 leading-relaxed max-w-xs">
-            Empowering domestic workers to analyze contracts, check recruitment fees, and match job preferences — transparently.
+            {t('login.heroDesc')}
           </p>
           <div className="space-y-2.5 pt-1">
             {[
-              'Spot contract red-flags instantly',
-              'Check typical recruitment fee benchmarks',
-              'Match job preferences with AI fairness',
+              t('login.bullet1'),
+              t('login.bullet2'),
+              t('login.bullet3'),
             ].map((b, i) => (
               <div key={i} className="flex items-center space-x-2.5 text-xs text-blue-50 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
@@ -103,7 +111,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </div>
 
         <p className="text-[10px] text-blue-200/70 leading-normal relative z-10">
-          KakakSafe is a decision support system. We do not replace legal recruitment channels or agencies.
+          {t('login.disclaimer')}
         </p>
       </div>
 
@@ -122,7 +130,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Login</span>
+              <span>{t('login.login')}</span>
             </button>
             <button
               onClick={() => reset('signup')}
@@ -133,17 +141,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Sign Up</span>
+              <span>{t('login.signUp')}</span>
             </button>
           </div>
 
           <h3 className="text-lg font-black text-gray-900 tracking-tight">
-            {authMode === 'login' ? 'Welcome back 👋' : 'Create your account ✨'}
+            {authMode === 'login' ? t('login.welcomeBack') : t('login.createAccount')}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            {authMode === 'login'
-              ? 'Sign in to your KakakSafe account'
-              : 'Set up your profile and start matching'}
+            {authMode === 'login' ? t('login.signInTo') : t('login.setUpProfile')}
           </p>
         </div>
 
@@ -157,7 +163,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            👩 Kakak (Worker)
+            👩 {t('login.kakakWorker')}
           </button>
           <button
             onClick={() => { setRoleTab('employer'); setError(''); }}
@@ -167,7 +173,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            🏢 Employer / Agency
+            🏢 {t('login.employerAgency')}
           </button>
         </div>
 
@@ -176,7 +182,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
           {/* Email */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Email</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('login.email')}</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
               <input
@@ -191,7 +197,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
           {/* Password */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Password</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('login.password')}</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
               <input
@@ -201,11 +207,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 placeholder="••••••••"
                 className="w-full border border-gray-200 rounded-xl pl-9 pr-10 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
+              <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
@@ -214,7 +216,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {/* Confirm Password — Sign Up only */}
           {authMode === 'signup' && (
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Confirm Password</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('login.confirmPassword')}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                 <input
@@ -223,21 +225,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
                   placeholder="••••••••"
                   className={`w-full border rounded-xl pl-9 pr-10 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white ${
-                    confirmPassword && confirmPassword !== password
-                      ? 'border-red-300 focus:ring-red-400'
-                      : 'border-gray-200'
+                    confirmPassword && confirmPassword !== password ? 'border-red-300 focus:ring-red-400' : 'border-gray-200'
                   }`}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
+                <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showConfirm ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
               {confirmPassword && confirmPassword !== password && (
-                <p className="text-[10px] text-red-500 font-semibold">Passwords do not match</p>
+                <p className="text-[10px] text-red-500 font-semibold">{t('login.passwordMismatch')}</p>
               )}
             </div>
           )}
@@ -249,20 +245,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             className={`w-full py-3 rounded-xl text-xs font-bold text-white shadow-sm transition-all flex items-center justify-center space-x-2 ${
-              roleTab === 'kakak'
-                ? 'bg-blue-600 hover:bg-blue-700'
-                : 'bg-purple-600 hover:bg-purple-700'
+              roleTab === 'kakak' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
             }`}
           >
             {authMode === 'login' ? (
               <>
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Login as {roleTab === 'kakak' ? 'Kakak' : 'Employer'}</span>
+                <span>{t('login.loginAs')} {roleTab === 'kakak' ? 'Kakak' : t('login.employerAgency')}</span>
               </>
             ) : (
               <>
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>Create Account & Continue</span>
+                <span>{t('login.createAndContinue')}</span>
               </>
             )}
           </button>
@@ -271,15 +265,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         {/* ── Auth mode switcher hint ── */}
         <p className="text-center text-[11px] text-gray-400">
           {authMode === 'login' ? (
-            <>Don't have an account?{' '}
+            <>{t('login.dontHaveAccount')}{' '}
               <button onClick={() => reset('signup')} className="text-blue-600 font-bold hover:underline">
-                Sign Up free
+                {t('login.signUpFree')}
               </button>
             </>
           ) : (
-            <>Already have an account?{' '}
+            <>{t('login.alreadyHaveAccount')}{' '}
               <button onClick={() => reset('login')} className="text-blue-600 font-bold hover:underline">
-                Login here
+                {t('login.loginHere')}
               </button>
             </>
           )}
@@ -288,7 +282,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         {/* ── Divider ── */}
         <div className="relative flex items-center">
           <div className="flex-grow border-t border-gray-150" />
-          <span className="flex-shrink mx-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or try a demo</span>
+          <span className="flex-shrink mx-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t('login.orTryDemo')}</span>
           <div className="flex-grow border-t border-gray-150" />
         </div>
 
@@ -301,8 +295,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="bg-blue-100 p-1.5 rounded-lg text-blue-700 self-start mb-2 group-hover:scale-110 transition-transform">
               <UserCheck className="w-3.5 h-3.5" />
             </div>
-            <p className="text-xs font-bold text-gray-900 leading-tight">Try as Worker</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Kakak demo account</p>
+            <p className="text-xs font-bold text-gray-900 leading-tight">{t('login.tryAsWorker')}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">{t('login.kakakDemoAccount')}</p>
           </div>
 
           <div
@@ -312,8 +306,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="bg-purple-100 p-1.5 rounded-lg text-purple-700 self-start mb-2 group-hover:scale-110 transition-transform">
               <Briefcase className="w-3.5 h-3.5" />
             </div>
-            <p className="text-xs font-bold text-gray-900 leading-tight">Try as Employer</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Employer demo account</p>
+            <p className="text-xs font-bold text-gray-900 leading-tight">{t('login.tryAsEmployer')}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">{t('login.employerDemoAccount')}</p>
           </div>
         </div>
       </div>

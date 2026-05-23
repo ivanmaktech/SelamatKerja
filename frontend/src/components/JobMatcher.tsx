@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from '../i18n';
+
 export interface KakakPreferences {
   expectedSalary: string; // "1500-1800" | "1800-2200" | "2200+"
   jobType: string; // childcare | elderly care | housekeeping | cooking
@@ -110,6 +112,7 @@ interface JobMatcherProps {
 }
 
 const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [jobs, setJobs] = useState<JobPosting[]>(INITIAL_DEMO_JOBS);
   const [preferences, setPreferences] = useState<KakakPreferences | null>(initialPreferences || null);
@@ -361,8 +364,8 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start space-x-3 text-blue-900 shadow-sm">
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs leading-relaxed font-medium">
-          <span className="font-bold block mb-0.5 text-blue-950">Decision Support System Notice</span>
-          KakakSafe helps domestic workers evaluate how employment terms match their preferences. We do not operate as an agency or hiring platform, nor do we replacement legal channels.
+          <span className="font-bold block mb-0.5 text-blue-950">{t('job.dssNoticeTitle')}</span>
+          {t('job.dssNoticeBody')}
         </div>
       </div>
 
@@ -372,9 +375,9 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
             <Sparkles className="w-6 h-6 text-blue-600" />
           </div>
           <div className="space-y-1.5">
-            <h3 className="font-bold text-gray-900 text-lg">Find Your Ideal Match</h3>
+            <h3 className="font-bold text-gray-900 text-lg">{t('job.findIdealMatch')}</h3>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Compare available jobs against your salary, duties, rest days, and housing preferences.
+              {t('job.findIdealMatchDesc')}
             </p>
           </div>
           <div className="flex flex-col space-y-2.5 pt-2">
@@ -382,13 +385,13 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
               onClick={() => setIsOnboarding(true)}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow transition-colors"
             >
-              Set My Preferences
+              {t('job.setPreferences')}
             </button>
             <button
               onClick={loadDemoSiti}
               className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-sm font-semibold transition-colors"
             >
-              Use Demo Profile (Siti Rahma)
+              {t('job.useDemoProfile')}
             </button>
           </div>
         </div>
@@ -539,33 +542,33 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
             <div className="space-y-1">
               <div className="flex items-center space-x-1 text-xs text-gray-500 font-bold uppercase tracking-wider">
                 <User className="w-3.5 h-3.5 text-blue-600" />
-                <span>My Search Profile</span>
+                <span>{t('job.mySearchProfile')}</span>
               </div>
               <div className="text-xs text-gray-700 flex flex-wrap gap-x-2 gap-y-1">
-                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{getJobTypeLabel(preferences.jobType)}</span>
+                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{t(getJobTypeLabel(preferences.jobType))}</span>
                 <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">Min RM {preferences.expectedSalary.split('-')[0]}</span>
-                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{preferences.restDays === 'weekly' ? 'Weekly rest' : preferences.restDays === '2days' ? '2 days rest' : 'No rest req'}</span>
-                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{preferences.accommodation}</span>
+                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{preferences.restDays === 'weekly' ? t('job.weeklyRest') : preferences.restDays === '2days' ? t('job.2daysRest') : t('job.noRestReq')}</span>
+                <span className="font-semibold bg-gray-100 px-2 py-0.5 rounded text-gray-800">{t('job.' + preferences.accommodation)}</span>
               </div>
             </div>
             <button
               onClick={() => setIsOnboarding(true)}
               className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg transition-colors"
             >
-              Edit
+              {t('job.edit')}
             </button>
           </div>
 
           {/* Matched jobs list */}
           <div className="space-y-3">
             <h4 className="font-bold text-gray-900 text-sm px-1 flex items-center justify-between">
-              <span>Matched Jobs ({getMatchedJobs().length})</span>
-              <span className="text-xs font-medium text-gray-500">Sorted by score</span>
+              <span>{t('job.matchedJobs')} ({getMatchedJobs().length})</span>
+              <span className="text-xs font-medium text-gray-500">{t('job.sortedByScore')}</span>
             </h4>
 
             {getMatchedJobs().length === 0 ? (
               <p className="text-center py-8 text-gray-400 text-sm bg-white border border-gray-200 rounded-2xl">
-                No matched jobs found. Try adjusting preferences.
+                {t('job.noMatchedJobs')}
               </p>
             ) : (
               getMatchedJobs().map(({ job, score }) => {
@@ -582,15 +585,15 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                     <div className="flex items-start justify-between">
                       <div className="space-y-0.5">
                         <div className="flex items-center space-x-1.5">
-                          <h5 className="font-bold text-gray-900 text-sm">{getJobTypeLabel(job.jobType)}</h5>
+                          <h5 className="font-bold text-gray-900 text-sm">{t(getJobTypeLabel(job.jobType))}</h5>
                           {isHighMatch && (
                             <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
-                              <Sparkles className="w-2.5 h-2.5 mr-0.5 text-blue-600" /> Recommended
+                              <Sparkles className="w-2.5 h-2.5 mr-0.5 text-blue-600" /> {t('job.recommended')}
                             </span>
                           )}
                         </div>
                         <p className="text-xs text-gray-500 flex items-center">
-                          <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" /> Posted by {job.employerName}
+                          <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" /> {t('job.postedBy')} {job.employerName}
                         </p>
                       </div>
 
@@ -600,23 +603,23 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                         score >= 50 ? 'bg-gradient-to-r from-blue-500 to-indigo-600' :
                         'bg-gradient-to-r from-orange-500 to-amber-600'
                       }`}>
-                        {score}% Match
+                        {score}% {t('job.match')}
                       </div>
                     </div>
 
                     {/* Details row */}
                     <div className="grid grid-cols-3 gap-2 py-1.5 border-t border-b border-gray-100 text-center">
                       <div className="space-y-0.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Salary</span>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t('job.salary')}</span>
                         <p className="text-xs font-bold text-gray-800">RM {job.salary}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Rest Days</span>
-                        <p className="text-xs font-bold text-gray-800">{job.restDays === 4 ? 'Weekly' : `${job.restDays} days`}</p>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t('job.restDays')}</span>
+                        <p className="text-xs font-bold text-gray-800">{job.restDays === 4 ? t('job.weeklyRest') : `${job.restDays} ${t('job.days')}`}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Lodging</span>
-                        <p className="text-xs font-bold text-gray-800">{job.accommodation}</p>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t('job.lodging')}</span>
+                        <p className="text-xs font-bold text-gray-800">{t('job.' + job.accommodation)}</p>
                       </div>
                     </div>
 
@@ -624,7 +627,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                     <div className="flex items-center justify-between text-xs pt-0.5">
                       <span className="text-gray-400 line-clamp-1 flex-1 pr-4">{job.jobDescription}</span>
                       <span className="text-blue-600 font-bold flex items-center whitespace-nowrap">
-                        Review AI Analysis <ChevronRight className="w-4 h-4 ml-0.5" />
+                        {t('job.reviewAnalysis')} <ChevronRight className="w-4 h-4 ml-0.5" />
                       </span>
                     </div>
                   </div>
@@ -643,10 +646,10 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-bold text-white text-lg leading-tight">{getJobTypeLabel(selectedJob.jobType)}</h3>
+                  <h3 className="font-bold text-white text-lg leading-tight">{t(getJobTypeLabel(selectedJob.jobType))}</h3>
                   {matchScore >= 70 && (
                     <span className="bg-blue-900/40 text-blue-300 border border-blue-800/50 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      Recommended
+                      {t('job.recommended')}
                     </span>
                   )}
                 </div>
@@ -671,7 +674,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                 {matchScore}%
               </div>
               <div className="flex-1 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alignment Score</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('job.alignmentScore')}</span>
                 <p className="text-sm font-bold text-slate-200">
                   {matchScore >= 80 ? 'Excellent match with your search profile!' :
                    matchScore >= 50 ? 'Good alignment, but note terms differences.' :
@@ -683,7 +686,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
             {/* AI Explanation Layer */}
             <div className="space-y-2.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400 mr-1" /> AI Explanation Layer
+                <Sparkles className="w-3.5 h-3.5 text-blue-400 mr-1" /> {t('job.aiExplanation')}
               </h4>
               <div className="bg-slate-950 border border-slate-800 text-white p-4 rounded-2xl shadow-inner relative overflow-hidden min-h-[70px] flex items-center">
                 {loadingExplanation ? (
@@ -712,32 +715,32 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                 )}
               </div>
               <p className="text-[10px] text-slate-500 leading-normal italic">
-                AI explains reasons based on matches. AI does not decide matches or replace recruitment processes.
+                {t('job.aiDisclaimer')}
               </p>
             </div>
 
             {/* Detailed Table */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Job Specifications</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('job.fullSpecs')}</h4>
               <div className="border border-slate-700 rounded-2xl overflow-hidden text-xs">
                 <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
-                  <span className="text-slate-400">Expected Salary</span>
+                  <span className="text-slate-400">{t('job.expectedSalary')}</span>
                   <span className="font-bold text-slate-100">RM {selectedJob.salary}</span>
                 </div>
                 <div className="flex justify-between p-3 border-b border-slate-700 font-medium">
-                  <span className="text-slate-400">Duties / Job Type</span>
-                  <span className="font-bold text-slate-100">{getJobTypeLabel(selectedJob.jobType)}</span>
+                  <span className="text-slate-400">{t('job.duties')}</span>
+                  <span className="font-bold text-slate-100">{t(getJobTypeLabel(selectedJob.jobType))}</span>
                 </div>
                 <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
-                  <span className="text-slate-400">Rest Days Per Month</span>
-                  <span className="font-bold text-slate-100">{selectedJob.restDays} days</span>
+                  <span className="text-slate-400">{t('job.restPerMonth')}</span>
+                  <span className="font-bold text-slate-100">{selectedJob.restDays} {t('job.days')}</span>
                 </div>
                 <div className="flex justify-between p-3 border-b border-slate-700 font-medium">
-                  <span className="text-slate-400">Accommodation Type</span>
-                  <span className="font-bold text-slate-100">{selectedJob.accommodation}</span>
+                  <span className="text-slate-400">{t('job.accomType')}</span>
+                  <span className="font-bold text-slate-100">{t('job.' + selectedJob.accommodation)}</span>
                 </div>
                 <div className="flex justify-between p-3 border-b border-slate-700 bg-slate-800/50 font-medium">
-                  <span className="text-slate-400">Required Language</span>
+                  <span className="text-slate-400">{t('job.reqLanguage')}</span>
                   <span className="font-bold text-slate-100">{selectedJob.languageRequirement}</span>
                 </div>
                 {selectedJob.deductions > 0 && (
@@ -752,7 +755,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
             </div>
 
             <div className="space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Description</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('job.description')}</h4>
               <p className="text-xs text-slate-300 leading-relaxed bg-slate-800/30 p-3 rounded-2xl border border-slate-700/50">
                 {selectedJob.jobDescription}
               </p>
@@ -773,7 +776,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                   disabled={isSubmittingInterest}
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all text-center flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/20"
                 >
-                  {isSubmittingInterest ? 'Sending...' : "I'm Interested"}
+                  {isSubmittingInterest ? 'Sending...' : t('job.imInterested')}
                 </button>
               )}
               
@@ -781,7 +784,7 @@ const JobMatcher: React.FC<JobMatcherProps> = ({ userName, initialPreferences })
                 onClick={() => setSelectedJob(null)}
                 className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors text-center block border border-slate-700 hover:border-slate-600"
               >
-                Back to Matched List
+                {t('job.backToList')}
               </button>
             </div>
           </div>

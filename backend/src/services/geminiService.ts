@@ -18,7 +18,8 @@ type ContractFields = {
     penalties: string | null;
 };
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'fake-key' });
+const geminiKeys = (process.env.GEMINI_API_KEY || 'fake-key').split(',').map(k => k.trim()).filter(k => k.length > 0);
+let currentGeminiIndex = 0;
 const model = 'gemini-2.5-flash';
 
 // Groq (via OpenAI-compatible client)
@@ -42,11 +43,21 @@ const runWithFallback = async (
     prompt: string,
     fallback: () => string,
 ): Promise<string> => {
-    try {
-        const response = await ai.models.generateContent({ model, contents: prompt });
-        return response.text ?? fallback();
-    } catch (geminiErr) {
-        console.error(`Gemini Error (${label}):`, geminiErr);
+    let lastGeminiErr = null;
+
+    // Try Gemini keys one by one
+    for (let i = 0; i < geminiKeys.length; i++) {
+        try {
+            const ai = new GoogleGenAI({ apiKey: geminiKeys[currentGeminiIndex] });
+            const response = await ai.models.generateContent({ model, contents: prompt });
+            return response.text ?? fallback();
+        } catch (geminiErr: any) {
+            console.error(`Gemini Error (${label}, key index ${currentGeminiIndex}):`, geminiErr?.message || geminiErr);
+            lastGeminiErr = geminiErr;
+            // Rotate to next key
+            currentGeminiIndex = (currentGeminiIndex + 1) % geminiKeys.length;
+        }
+    }
 
         try {
             if (!groqApiKey) {

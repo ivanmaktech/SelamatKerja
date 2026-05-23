@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { User, KakakProfile, EmployerProfile } from '../types';
 import { Save, CheckCircle } from 'lucide-react';
+import { useTranslation } from '../i18n';
 
 interface SettingsProps {
   user: User;
@@ -61,6 +62,7 @@ const AGENCY_TYPES = [
 ];
 
 const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmployer }) => {
+  const { t } = useTranslation();
   const [successMsg, setSuccessMsg] = useState('');
 
   // Kakak State
@@ -90,7 +92,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
   const [eOvertime, setEOvertime] = useState(e?.overtimePolicy || 'paid');
 
   const showSuccess = () => {
-    setSuccessMsg('Settings saved successfully!');
+    setSuccessMsg(t('settings.savedMsg'));
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
@@ -137,7 +139,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
     return (
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Settings</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">{t('settings.personalSettings')}</h2>
           
           {successMsg && (
             <div className="mb-6 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl flex items-center space-x-2">
@@ -149,11 +151,11 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
           <form onSubmit={saveKakak} className="space-y-8">
             {/* Profile */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">Basic Profile</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">{t('settings.basicProfile')}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-700">Full Name / Nickname</label>
+                  <label className="text-xs font-bold text-gray-700">{t('settings.fullName')}</label>
                   <input
                     type="text"
                     value={kName}
@@ -163,7 +165,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Country of Origin</label>
+                  <label className="text-xs font-bold text-gray-700">{t('settings.countryOfOrigin')}</label>
                   <select
                     value={APPROVED_COUNTRIES.some(c => c.value === kCountry) ? kCountry : 'Others'}
                     onChange={e => {
@@ -179,7 +181,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
                        type="text"
                        value={kOtherCountry}
                        onChange={e => setKOtherCountry(e.target.value)}
-                       placeholder="Specify country..."
+                       placeholder={t('settings.specifyCountry')}
                        className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none mt-2"
                      />
                   )}
@@ -189,35 +191,35 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
 
             {/* Preferences */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">Job Preferences</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">{t('settings.jobPreferences')}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Preferred State</label>
+                  <label className="text-xs font-bold text-gray-700">{t('settings.preferredState')}</label>
                   <select value={kLoc} onChange={e => setKLoc(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
                     {LOCATIONS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Expected Salary</label>
+                  <label className="text-xs font-bold text-gray-700">{t('settings.expectedSalary')}</label>
                   <select value={kSalary} onChange={e => setKSalary(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
                     {SALARY_RANGES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Accommodation</label>
+                  <label className="text-xs font-bold text-gray-700">{t('settings.accommodation')}</label>
                   <select value={kAccom} onChange={e => setKAccom(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
-                    <option value="provided">Provided</option>
-                    <option value="no-preference">No Preference</option>
-                    <option value="must-private">Need Privacy</option>
+                    <option value="provided">{t('settings.provided')}</option>
+                    <option value="no-preference">{t('settings.noPreference')}</option>
+                    <option value="must-private">{t('settings.needPrivacy')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Job Types (Multi-select)</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.jobTypes')}</label>
                 <div className="flex flex-wrap gap-2">
                   {JOB_TYPES.map(jt => (
                     <button
@@ -237,19 +239,19 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
 
             {/* Concerns */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">Key Concerns</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">{t('settings.keyConcerns')}</h3>
               <div className="space-y-3">
                 <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-xl hover:bg-gray-50">
                   <input type="checkbox" checked={kWantsClear} onChange={e => setKWantsClear(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
-                  <span className="text-sm font-medium">I want clear salary terms before signing</span>
+                  <span className="text-sm font-medium">{t('settings.wantClearSalary')}</span>
                 </label>
                 <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-xl hover:bg-gray-50">
                   <input type="checkbox" checked={kLowFees} onChange={e => setKLowFees(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
-                  <span className="text-sm font-medium">I prefer employers/agencies with low fees</span>
+                  <span className="text-sm font-medium">{t('settings.preferLowFees')}</span>
                 </label>
                 <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-xl hover:bg-gray-50">
                   <input type="checkbox" checked={kWeeklyRest} onChange={e => setKWeeklyRest(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
-                  <span className="text-sm font-medium">I want a weekly rest day</span>
+                  <span className="text-sm font-medium">{t('settings.wantWeeklyRest')}</span>
                 </label>
               </div>
             </div>
@@ -257,7 +259,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
             <div className="pt-4 flex justify-end">
               <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm flex items-center space-x-2">
                 <Save className="w-4 h-4" />
-                <span>Save Changes</span>
+                <span>{t('settings.saveChanges')}</span>
               </button>
             </div>
           </form>
@@ -270,7 +272,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Organisation Settings</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">{t('settings.orgSettings')}</h2>
         
         {successMsg && (
           <div className="mb-6 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl flex items-center space-x-2">
@@ -281,10 +283,10 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
 
         <form onSubmit={saveEmployer} className="space-y-8">
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">Organisation Details</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">{t('settings.orgDetails')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Employer / Agency Name</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.employerAgencyName')}</label>
                 <input
                   type="text"
                   value={eName}
@@ -293,48 +295,48 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Location</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.location')}</label>
                 <select value={eLoc} onChange={e => setELoc(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
                   {LOCATIONS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Type</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.type')}</label>
                 <select value={eType} onChange={e => setEType(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
-                  {AGENCY_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                  {AGENCY_TYPES.map(a => <option key={a.value} value={a.value}>{a.value === 'private-employer' ? t('settings.privateEmployer') : t('settings.recruitmentAgency')}</option>)}
                 </select>
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">Transparency Settings</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b pb-2">{t('settings.transparencySettings')}</h3>
             <div className="space-y-3">
               <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-xl hover:bg-gray-50">
                 <input type="checkbox" checked={eShowFee} onChange={e => setEShowFee(e.target.checked)} className="w-4 h-4 text-purple-600 rounded" />
-                <span className="text-sm font-medium">Show recruitment fee to candidates</span>
+                <span className="text-sm font-medium">{t('settings.showRecruitmentFee')}</span>
               </label>
               <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-xl hover:bg-gray-50">
                 <input type="checkbox" checked={eContract} onChange={e => setEContract(e.target.checked)} className="w-4 h-4 text-purple-600 rounded" />
-                <span className="text-sm font-medium">Employment contract available on request</span>
+                <span className="text-sm font-medium">{t('settings.contractAvailable')}</span>
               </label>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Passport Policy</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.passportPolicy')}</label>
                 <select value={ePassport} onChange={e => setEPassport(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
-                  <option value="worker-holds">Worker holds own passport</option>
-                  <option value="agency-holds">Agency holds temporarily</option>
-                  <option value="discuss">To be discussed</option>
+                  <option value="worker-holds">{t('settings.workerHoldsPassport')}</option>
+                  <option value="agency-holds">{t('settings.agencyHoldsTemporarily')}</option>
+                  <option value="discuss">{t('settings.toBeDiscussed')}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Overtime Policy</label>
+                <label className="text-xs font-bold text-gray-700">{t('settings.overtimePolicy')}</label>
                 <select value={eOvertime} onChange={e => setEOvertime(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
-                  <option value="paid">Paid overtime</option>
-                  <option value="time-off">Time off in lieu</option>
-                  <option value="none">Not applicable</option>
+                  <option value="paid">{t('settings.paidOvertime')}</option>
+                  <option value="time-off">{t('settings.timeOffInLieu')}</option>
+                  <option value="none">{t('settings.notApplicable')}</option>
                 </select>
               </div>
             </div>
@@ -343,7 +345,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateKakak, onUpdateEmploy
           <div className="pt-4 flex justify-end">
             <button type="submit" className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-sm flex items-center space-x-2">
               <Save className="w-4 h-4" />
-              <span>Save Changes</span>
+              <span>{t('settings.saveChanges')}</span>
             </button>
           </div>
         </form>

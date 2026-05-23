@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { ShieldCheck } from 'lucide-react';
+import { useTranslation } from '../i18n';
 
 const FeeChecker: React.FC = () => {
+    const { t } = useTranslation();
     const [fee, setFee] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState('');
@@ -17,7 +19,7 @@ const FeeChecker: React.FC = () => {
             }
         } catch (error) {
             console.error("Error checking fee:", error);
-            setResult("Failed to check the fee. Please try again.");
+            setResult(t('fee.failed'));
         } finally {
             setLoading(false);
         }
@@ -26,8 +28,8 @@ const FeeChecker: React.FC = () => {
     return (
         <div className="flex flex-col space-y-4">
             <div className="text-center">
-                <h2 className="text-xl font-semibold mb-2">"Is This Normal?" Fee Checker</h2>
-                <p className="text-sm text-gray-500">Find out if the recruitment fee you were quoted is typical.</p>
+                <h2 className="text-xl font-semibold mb-2">{t('fee.title')}</h2>
+                <p className="text-sm text-gray-500">{t('fee.subtitle')}</p>
             </div>
             
             <div className="relative">
@@ -48,14 +50,14 @@ const FeeChecker: React.FC = () => {
                 onClick={handleCheck}
                 disabled={loading}
             >
-                {loading ? 'Checking...' : 'Check Fee'}
+                {loading ? t('fee.checking') : t('fee.checkBtn')}
             </button>
 
             {result && (
                 <div className="mt-6 bg-purple-50 border border-purple-100 rounded-lg p-5">
                     <div className="flex items-start mb-3">
                         <ShieldCheck className="w-6 h-6 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <h3 className="font-semibold text-purple-900 leading-tight">Assessment</h3>
+                        <h3 className="font-semibold text-purple-900 leading-tight">{t('fee.assessment')}</h3>
                     </div>
                     <p className="text-sm text-purple-800 whitespace-pre-wrap leading-relaxed ml-8">
                         {result}

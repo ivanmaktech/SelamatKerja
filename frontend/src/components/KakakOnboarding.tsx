@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, CheckCircle, Sparkles } from 'lucide-react';
 import type { KakakProfile } from '../types';
+import { useTranslation } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface KakakOnboardingProps {
   defaultName: string;
@@ -75,6 +77,7 @@ const LANGUAGE_OPTIONS = [
 const TOTAL_STEPS = 3;
 
 const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComplete }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
 
   // Step 1 — Basic Profile
@@ -120,7 +123,10 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
   const progressPct = ((step - 1) / TOTAL_STEPS) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-100 flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
       <div className="bg-white rounded-3xl shadow-2xl border border-blue-100 w-full max-w-md overflow-hidden">
 
         {/* Header */}
@@ -128,19 +134,19 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-4 h-4 text-blue-200" />
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-200">Worker Setup</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-200">{t('onboard.workerSetup')}</span>
             </div>
-            <span className="text-[10px] font-bold text-blue-300">Step {step} of {TOTAL_STEPS}</span>
+            <span className="text-[10px] font-bold text-blue-300">{t('onboard.step')} {step} {t('onboard.of')} {TOTAL_STEPS}</span>
           </div>
           <h2 className="font-extrabold text-xl leading-tight">
-            {step === 1 && 'Tell us about yourself'}
-            {step === 2 && 'What kind of job do you want?'}
-            {step === 3 && 'What matters most to you?'}
+            {step === 1 && t('onboard.kakakStep1Title')}
+            {step === 2 && t('onboard.kakakStep2Title')}
+            {step === 3 && t('onboard.kakakStep3Title')}
           </h2>
           <p className="text-blue-100 text-xs">
-            {step === 1 && 'Just your name and where you\'re from — nothing sensitive.'}
-            {step === 2 && 'Set your preferences once. We\'ll match jobs to you.'}
-            {step === 3 && 'Tell us your key concerns so we can flag relevant jobs.'}
+            {step === 1 && t('onboard.kakakStep1Desc')}
+            {step === 2 && t('onboard.kakakStep2Desc')}
+            {step === 3 && t('onboard.kakakStep3Desc')}
           </p>
           {/* Progress Bar */}
           <div className="h-1 bg-white/20 rounded-full overflow-hidden">
@@ -158,18 +164,18 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
           {step === 1 && (
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Your Name / Nickname</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.nameLabel')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="e.g. Siti, Dewi, Maria..."
+                  placeholder={t('onboard.kakak.namePlaceholder')}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Country of Origin</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.countryLabel')}</label>
                 <div className="flex flex-wrap gap-2">
                   {APPROVED_COUNTRIES.map(c => (
                     <button
@@ -181,7 +187,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      {c.label}
+                      {t(c.label)}
                     </button>
                   ))}
                 </div>
@@ -193,15 +199,15 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                       type="text"
                       value={otherCountry}
                       onChange={e => setOtherCountry(e.target.value)}
-                      placeholder="Please specify your country..."
+                      placeholder={t('onboard.kakak.countryOtherPlaceholder')}
                       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
                     />
                     <div className="flex items-start space-x-2.5 bg-amber-50 border border-amber-200 rounded-xl p-3">
                       <span className="text-base flex-shrink-0 mt-0.5">⚠️</span>
                       <div className="text-[11px] text-amber-900 leading-relaxed">
-                        <p className="font-bold mb-0.5">Country may not be approved</p>
-                        <p>Malaysia's Foreign Domestic Helper (FDH) programme currently approves workers from Indonesia, Thailand, Cambodia, Philippines, Sri Lanka, India, Vietnam, Laos, and Nepal only.</p>
-                        <p className="mt-1">If your country is not on this list, you may <span className="font-bold">not be eligible</span> to work as a domestic helper under current regulations. Please check with the nearest Malaysian embassy or a licensed recruitment agency.</p>
+                        <p className="font-bold mb-0.5">{t('onboard.kakak.countryWarningTitle')}</p>
+                        <p>{t('onboard.kakak.countryWarning1')}</p>
+                        <p className="mt-1">{t('onboard.kakak.countryWarning2')}</p>
                       </div>
                     </div>
                   </div>
@@ -215,7 +221,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
             <div className="space-y-5">
               {/* Salary */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Expected Monthly Salary</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.salaryLabel')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {SALARY_RANGES.map(s => (
                     <button
@@ -235,7 +241,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
 
               {/* Location */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Preferred State / Area</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.locationLabel')}</label>
                 <div className="flex flex-wrap gap-2">
                   {LOCATIONS.map(l => (
                     <button
@@ -256,7 +262,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
               {/* Job Types — multi-select */}
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Job Type <span className="text-blue-500 normal-case">(pick all that apply)</span>
+                  {t('onboard.kakak.jobTypeLabel')} <span className="text-blue-500 normal-case">{t('onboard.kakak.jobTypePickAll')}</span>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {JOB_TYPES.map(jt => (
@@ -269,7 +275,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      {jt.label}
+                      {t(jt.label)}
                       {jobTypes.includes(jt.value) && (
                         <span className="absolute top-1 right-1.5 text-blue-600 text-[10px]">✓</span>
                       )}
@@ -280,7 +286,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
 
               {/* Rest Days */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Rest Day Preference</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.restDayLabel')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {REST_DAY_OPTIONS.map(r => (
                     <button
@@ -292,8 +298,8 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      <div>{r.label}</div>
-                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{r.sublabel}</div>
+                      <div>{t(r.label)}</div>
+                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{t(r.sublabel)}</div>
                     </button>
                   ))}
                 </div>
@@ -301,7 +307,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
 
               {/* Accommodation */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Accommodation</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.accommodationLabel')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {ACCOMMODATION_OPTIONS.map(a => (
                     <button
@@ -313,8 +319,8 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      <div>{a.label}</div>
-                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{a.sublabel}</div>
+                      <div>{t(a.label)}</div>
+                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{t(a.sublabel)}</div>
                     </button>
                   ))}
                 </div>
@@ -322,7 +328,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
 
               {/* Language */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Language Comfort</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.kakak.languageLabel')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {LANGUAGE_OPTIONS.map(l => (
                     <button
@@ -334,7 +340,7 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      {l.label}
+                      {t(l.label)}
                     </button>
                   ))}
                 </div>
@@ -345,28 +351,28 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
           {/* ===== STEP 3: Concerns ===== */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-xs text-gray-500 leading-relaxed bg-blue-50 border border-blue-100 rounded-xl p-3">
-                These help us explain <strong>why</strong> a job does or doesn't match what you care about — not just the numbers.
-              </p>
+                <p className="text-[11px] text-gray-500 bg-white border rounded-xl p-3 shadow-sm">
+                  {t('onboard.kakak.step3Info')}
+                </p>
 
               {[
                 {
-                  label: 'I want clear salary before signing',
-                  sublabel: 'No surprises after I arrive',
+                  label: t('onboard.kakak.concern1Label'),
+                  sublabel: t('onboard.kakak.concern1Desc'),
                   value: wantsClearSalary,
                   setter: setWantsClearSalary,
                   icon: '💰',
                 },
                 {
-                  label: 'I prefer agencies with low fees',
-                  sublabel: 'Recruitment fees should be reasonable',
+                  label: t('onboard.kakak.concern2Label'),
+                  sublabel: t('onboard.kakak.concern2Desc'),
                   value: prefersLowFees,
                   setter: setPrefersLowFees,
                   icon: '📉',
                 },
                 {
-                  label: 'I want weekly rest day',
-                  sublabel: 'At least once a week to rest',
+                  label: t('onboard.kakak.concern3Label'),
+                  sublabel: t('onboard.kakak.concern3Desc'),
                   value: wantsWeeklyRest,
                   setter: setWantsWeeklyRest,
                   icon: '🌿',
@@ -402,10 +408,10 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white space-y-1">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-blue-200" />
-                  <p className="text-xs font-bold">You're all set!</p>
+                  <p className="text-xs font-bold">{t('onboard.all_set')}</p>
                 </div>
                 <p className="text-[11px] text-blue-100 leading-relaxed">
-                  We match based on your real concerns — not just salary. Jobs that don't fit your preferences will be flagged automatically.
+                  {t('onboard.match_desc')}
                 </p>
               </div>
             </div>
@@ -417,11 +423,14 @@ const KakakOnboarding: React.FC<KakakOnboardingProps> = ({ defaultName, onComple
           const isBlocked = step === 1 && country === 'Others';
           return (
             <div className="px-6 pb-6 space-y-2">
+              <div className="absolute top-4 right-4">
+                <LanguageSwitcher />
+              </div>
               {isBlocked && (
                 <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
                   <span className="text-sm">🚫</span>
                   <p className="text-[11px] text-red-700 font-semibold leading-snug">
-                    You cannot continue — your country is currently not approved under Malaysia's Foreign Domestic Helper programme.
+                    {t('onboard.blocked_error')}
                   </p>
                 </div>
               )}

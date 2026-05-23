@@ -1,12 +1,14 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FileText, Calculator, MessageCircleQuestion, Briefcase, Users, FileCheck, Settings, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '../i18n';
 
 interface NavigationProps {
     role: 'kakak' | 'employer';
 }
 
 const Navigation: React.FC<NavigationProps> = ({ role }) => {
+    const { t } = useTranslation();
     const navItemClass = ({ isActive }: { isActive: boolean }) => 
         `flex items-center px-4 py-3 md:py-2.5 rounded-xl md:rounded-lg text-sm font-semibold transition-all ${
             isActive 
@@ -26,7 +28,7 @@ const Navigation: React.FC<NavigationProps> = ({ role }) => {
                     <div className={`text-[9px] font-bold uppercase tracking-widest leading-none mt-0.5 ${
                         role === 'kakak' ? 'text-blue-600' : 'text-purple-600'
                     }`}>
-                        {role === 'kakak' ? 'Worker Mode' : 'Employer Mode'}
+                    {role === 'kakak' ? t('app.workerMode') : t('app.employerMode')}
                     </div>
                 </div>
             </div>
@@ -36,48 +38,48 @@ const Navigation: React.FC<NavigationProps> = ({ role }) => {
                     <>
                         <NavLink to="/" className={navItemClass}>
                             <FileText className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Contract</span>
+                            <span className="whitespace-nowrap">{t('nav.contract')}</span>
                         </NavLink>
                         <NavLink to="/fee-checker" className={navItemClass}>
                             <Calculator className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Fees</span>
+                            <span className="whitespace-nowrap">{t('nav.fees')}</span>
                         </NavLink>
                         <NavLink to="/assistant" className={navItemClass}>
                             <MessageCircleQuestion className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Ask AI</span>
+                            <span className="whitespace-nowrap">{t('nav.askAI')}</span>
                         </NavLink>
                         <NavLink to="/matching" className={navItemClass}>
                             <Briefcase className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Job Match</span>
+                            <span className="whitespace-nowrap">{t('nav.jobMatch')}</span>
                         </NavLink>
                         <NavLink to="/contracts" className={navItemClass}>
                             <FileCheck className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Pending Contracts</span>
+                            <span className="whitespace-nowrap">{t('nav.pendingContracts')}</span>
                         </NavLink>
                         <div className="hidden md:block my-2 border-t border-gray-100" />
                         <NavLink to="/settings" className={navItemClass}>
                             <Settings className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Settings</span>
+                            <span className="whitespace-nowrap">{t('nav.settings')}</span>
                         </NavLink>
                     </>
                 ) : (
                     <>
                         <NavLink to="/" className={navItemClass}>
                             <Briefcase className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">My Jobs</span>
+                            <span className="whitespace-nowrap">{t('nav.myJobs')}</span>
                         </NavLink>
                         <NavLink to="/interests" className={navItemClass}>
                             <Users className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Interest Inbox</span>
+                            <span className="whitespace-nowrap">{t('nav.interestInbox')}</span>
                         </NavLink>
                         <NavLink to="/contract-tools" className={navItemClass}>
                             <FileCheck className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Contract Tools</span>
+                            <span className="whitespace-nowrap">{t('nav.contractTools')}</span>
                         </NavLink>
                         <div className="hidden md:block my-2 border-t border-gray-100" />
                         <NavLink to="/settings" className={navItemClass}>
                             <Settings className="w-4 h-4 mr-2.5 flex-shrink-0" />
-                            <span className="whitespace-nowrap">Settings</span>
+                            <span className="whitespace-nowrap">{t('nav.settings')}</span>
                         </NavLink>
                     </>
                 )}

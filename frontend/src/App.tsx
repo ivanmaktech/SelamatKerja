@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { LogOut, ShieldCheck } from 'lucide-react';
 import type { User, KakakProfile, EmployerProfile } from './types';
+import { useTranslation } from './i18n';
 
 import Navigation from './components/Navigation';
 import ContractExplanation from './components/ContractExplanation';
@@ -16,6 +17,7 @@ import KakakOnboarding from './components/KakakOnboarding';
 import EmployerOnboarding from './components/EmployerOnboarding';
 import Settings from './components/Settings';
 import PendingContracts from './components/PendingContracts';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 type AppState = 'login' | 'onboarding' | 'app';
 
@@ -24,6 +26,7 @@ type AppState = 'login' | 'onboarding' | 'app';
 // ─────────────────────────────────────────────
 function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () => void; onUpdateUser: (u: User) => void }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     navigate('/');
@@ -63,7 +66,7 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
                 <span className={`ml-2 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full ${
                   user.role === 'kakak' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                 }`}>
-                  {user.role === 'kakak' ? 'Worker' : 'Employer'}
+                  {user.role === 'kakak' ? t('app.workerMode') : t('app.employerMode')}
                 </span>
               </div>
             </div>
@@ -72,8 +75,9 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
             <div className="hidden md:block flex-1" />
 
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               <div className="text-right hidden sm:block">
-                <p className="text-[10px] text-gray-400 font-medium">Welcome back</p>
+                <p className="text-[10px] text-gray-400 font-medium">{t('app.welcomeBack')}</p>
                 <p className="text-xs font-bold text-gray-800 leading-none">
                   {user.kakakProfile?.name ?? user.employerProfile?.name ?? user.email.split('@')[0]}
                 </p>
@@ -84,7 +88,7 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
                 title="Logout"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t('app.logout')}</span>
               </button>
             </div>
           </div>
@@ -95,16 +99,16 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
             {user.role === 'kakak' && user.kakakProfile && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {user.kakakProfile.wantsClearSalary && (
-                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">💰 Clear salary</span>
+                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">💰 {t('badge.clearSalary')}</span>
                 )}
                 {user.kakakProfile.prefersLowFees && (
-                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📉 Low fees</span>
+                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">📉 {t('badge.lowFees')}</span>
                 )}
                 {user.kakakProfile.wantsWeeklyRest && (
-                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">🌿 Weekly rest</span>
+                  <span className="text-[9px] font-bold bg-blue-50 border border-blue-100 text-blue-700 px-2 py-0.5 rounded-full">🌿 {t('badge.weeklyRest')}</span>
                 )}
                 {user.kakakProfile.country && (
-                  <span className="text-[9px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-full">🌏 {user.kakakProfile.country}</span>
+                  <span className="text-[9px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-full">🌏 {t(user.kakakProfile.country)}</span>
                 )}
               </div>
             )}
@@ -113,13 +117,13 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
             {user.role === 'employer' && user.employerProfile && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {user.employerProfile.contractAvailable && (
-                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">📄 Contract available</span>
+                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">📄 {t('badge.contractAvail')}</span>
                 )}
                 {user.employerProfile.passportPolicy === 'worker-holds' && (
-                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✅ Worker holds passport</span>
+                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✅ {t('badge.holdsPassport')}</span>
                 )}
                 {user.employerProfile.overtimePolicy === 'paid' && (
-                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">💵 Paid overtime</span>
+                  <span className="text-[9px] font-bold bg-purple-50 border border-purple-100 text-purple-700 px-2 py-0.5 rounded-full">💵 {t('badge.paidOvertime')}</span>
                 )}
                 {user.employerProfile.location && (
                   <span className="text-[9px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-full">📍 {user.employerProfile.location}</span>
@@ -202,6 +206,7 @@ function AppShell({ user, onLogout, onUpdateUser }: { user: User; onLogout: () =
 // Root App
 // ─────────────────────────────────────────────
 function App() {
+  const { t } = useTranslation();
   const [appState, setAppState] = useState<AppState>('login');
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -309,7 +314,7 @@ function App() {
   };
 
   if (isInitializing) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-blue-600 font-bold">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-blue-600 font-bold">{t('app.loading')}</div>;
   }
 
   // ── LOGIN SCREEN ──

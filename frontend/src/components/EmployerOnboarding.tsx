@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, CheckCircle, Sparkles } from 'lucide-react';
 import type { EmployerProfile } from '../types';
+import { useTranslation } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface EmployerOnboardingProps {
   defaultName: string;
@@ -52,6 +54,7 @@ const OVERTIME_POLICIES = [
 const TOTAL_STEPS = 3;
 
 const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, onComplete }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
 
   // Step 1 — Basic Info
@@ -84,7 +87,10 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
   const progressPct = ((step - 1) / TOTAL_STEPS) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-violet-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-violet-100 flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
       <div className="bg-white rounded-3xl shadow-2xl border border-purple-100 w-full max-w-md overflow-hidden">
 
         {/* Header */}
@@ -92,19 +98,19 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-4 h-4 text-purple-200" />
-              <span className="text-xs font-bold uppercase tracking-widest text-purple-200">Employer Setup</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-purple-200">{t('onboard.employerSetup')}</span>
             </div>
-            <span className="text-[10px] font-bold text-purple-300">Step {step} of {TOTAL_STEPS}</span>
+            <span className="text-[10px] font-bold text-purple-300">{t('onboard.step')} {step} {t('onboard.of')} {TOTAL_STEPS}</span>
           </div>
           <h2 className="font-extrabold text-xl leading-tight">
-            {step === 1 && 'Your organisation details'}
-            {step === 2 && 'Your hiring experience'}
-            {step === 3 && 'Transparency settings'}
+            {step === 1 && t('onboard.empStep1Title')}
+            {step === 2 && t('onboard.empStep2Title')}
+            {step === 3 && t('onboard.empStep3Title')}
           </h2>
           <p className="text-purple-100 text-xs">
-            {step === 1 && 'Basic info about you or your agency.'}
-            {step === 2 && 'Helps candidates understand your background.'}
-            {step === 3 && 'These fields show candidates your hiring policies — building trust.'}
+            {step === 1 && t('onboard.empStep1Desc')}
+            {step === 2 && t('onboard.empStep2Desc')}
+            {step === 3 && t('onboard.empStep3Desc')}
           </p>
           {/* Progress Bar */}
           <div className="h-1 bg-white/20 rounded-full overflow-hidden">
@@ -122,18 +128,18 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
           {step === 1 && (
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Employer / Agency Name</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.nameLabel')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="e.g. Ahmad Kassim, Happy Home Agency..."
+                  placeholder={t('onboard.emp.namePlaceholder')}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Location (State)</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.locationLabel')}</label>
                 <div className="flex flex-wrap gap-2">
                   {LOCATIONS.map(l => (
                     <button
@@ -152,7 +158,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Employer Type</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.agencyTypeLabel')}</label>
                 <div className="space-y-2">
                   {AGENCY_TYPES.map(at => (
                     <button
@@ -165,9 +171,9 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                       }`}
                     >
                       <p className={`text-xs font-bold ${agencyType === at.value ? 'text-purple-900' : 'text-gray-800'}`}>
-                        {at.label}
+                        {t(at.label)}
                       </p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{at.sublabel}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{t(at.sublabel)}</p>
                     </button>
                   ))}
                 </div>
@@ -202,7 +208,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Hiring Experience</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.experienceLabel')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {EXPERIENCE_OPTIONS.map(e => (
                     <button
@@ -214,8 +220,8 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      <div>{e.label}</div>
-                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{e.sublabel}</div>
+                      <div>{t(e.label)}</div>
+                      <div className="text-[9px] font-normal text-gray-400 mt-0.5">{t(e.sublabel)}</div>
                     </button>
                   ))}
                 </div>
@@ -233,15 +239,15 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
               {/* Toggle fields */}
               {[
                 {
-                  label: 'Show recruitment fee to candidates',
-                  sublabel: 'Visible on your job card',
+                  label: t('onboard.emp.toggle1Label'),
+                  sublabel: t('onboard.emp.toggle1Desc'),
                   value: showRecruitmentFee,
                   setter: setShowRecruitmentFee,
-                  icon: '💵',
+                  icon: '💰',
                 },
                 {
-                  label: 'Employment contract available on request',
-                  sublabel: 'Worker can review before signing',
+                  label: t('onboard.emp.toggle2Label'),
+                  sublabel: t('onboard.emp.toggle2Desc'),
                   value: contractAvailable,
                   setter: setContractAvailable,
                   icon: '📄',
@@ -257,7 +263,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-xl">{toggle.icon}</span>
+                    <span className="font-bold">{t('onboard.finish')}</span>
                     <div>
                       <p className={`text-xs font-bold ${toggle.value ? 'text-purple-900' : 'text-gray-800'}`}>
                         {toggle.label}
@@ -275,7 +281,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
 
               {/* Passport Policy */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Passport Handling Policy</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.passportLabel')}</label>
                 <div className="space-y-1.5">
                   {PASSPORT_POLICIES.map(p => (
                     <button
@@ -287,7 +293,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      {p.label}
+                      {t(p.label)}
                     </button>
                   ))}
                 </div>
@@ -295,7 +301,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
 
               {/* Overtime Policy */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Overtime Policy</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('onboard.emp.overtimeLabel')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {OVERTIME_POLICIES.map(o => (
                     <button
@@ -307,7 +313,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                           : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      {o.label}
+                      {t(o.label)}
                     </button>
                   ))}
                 </div>
@@ -319,7 +325,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
                   <p className="text-xs font-bold">Profile complete!</p>
                 </div>
                 <p className="text-[11px] text-purple-100 leading-relaxed">
-                  Your transparency settings will be shown to candidates alongside each job post. Honesty builds trust and better matches.
+                  {t('onboard.emp.transparencyMsg')}
                 </p>
               </div>
             </div>
@@ -334,7 +340,7 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
               className="flex items-center space-x-1.5 px-4 py-3 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
+              <span>{t('onboard.back')}</span>
             </button>
           )}
           <button
@@ -343,13 +349,13 @@ const EmployerOnboarding: React.FC<EmployerOnboardingProps> = ({ defaultName, on
           >
             {step < TOTAL_STEPS ? (
               <>
-                <span>Continue</span>
+                <span>{t('onboard.continue')}</span>
                 <ChevronRight className="w-4 h-4" />
               </>
             ) : (
               <>
                 <CheckCircle className="w-4 h-4" />
-                <span>Go to Dashboard →</span>
+                <span>{t('onboard.goToDashboard')}</span>
               </>
             )}
           </button>
