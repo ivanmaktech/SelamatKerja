@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { explainContract, checkFee, askQuestion } from '../controllers/apiController';
-import { getJobs, createJob, explainMatch } from '../controllers/jobsController';
+import { getJobs, createJob, explainMatch, getCandidates } from '../controllers/jobsController';
 
 const router = Router();
 const upload = multer({ dest: 'uploads/' });
@@ -13,6 +13,7 @@ router.post('/ask', (req, res, next) => { askQuestion(req, res).catch(next); });
 router.get('/jobs', (req, res, next) => { getJobs(req, res).catch(next); });
 router.post('/jobs', (req, res, next) => { createJob(req, res).catch(next); });
 router.post('/explain-match', (req, res, next) => { explainMatch(req, res).catch(next); });
+router.get('/candidates', (req, res, next) => { getCandidates(req, res).catch(next); });
 
 export default router;
 

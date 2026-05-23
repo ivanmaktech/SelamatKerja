@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
 import { explainJobMatch } from '../services/geminiService';
 
+export interface CandidateProfile {
+    id: string;
+    name: string;
+    expectedSalary: string; // "1500-1800" | "1800-2200" | "2200+"
+    jobType: string; // childcare / elderly care / housekeeping / cooking
+    restDays: string; // weekly / 2days / none
+    accommodation: string; // Live-in / Live-out
+    language?: string;
+}
+
 export interface JobPosting {
     id: string;
     employerName: string;
@@ -15,13 +25,43 @@ export interface JobPosting {
 
 export interface KakakPreferences {
     expectedSalary: string; // "1500-1800" | "1800-2200" | "2200+"
-    jobType: string; // childcare | elderly care | housekeeping | cooking
-    restDays: string; // weekly | 2days | none
-    accommodation: string; // Live-in | Live-out
+    jobType: string; // childcare / elderly care / housekeeping / cooking
+    restDays: string; // weekly / 2days / none
+    accommodation: string; // Live-in / Live-out
     language?: string; // e.g. Malay/Indonesian, English, Cantonese
 }
 
-// In-memory job postings initialized with demo data
+// In-memory databases
+const candidatesDatabase: CandidateProfile[] = [
+    {
+        id: 'candidate-1',
+        name: 'Siti Rahma',
+        expectedSalary: '1800-2200',
+        jobType: 'childcare',
+        restDays: 'weekly',
+        accommodation: 'Live-in',
+        language: 'Malay/Indonesian',
+    },
+    {
+        id: 'candidate-2',
+        name: 'Dewi Utami',
+        expectedSalary: '1500-1800',
+        jobType: 'housekeeping',
+        restDays: 'weekly',
+        accommodation: 'Live-in',
+        language: 'English',
+    },
+    {
+        id: 'candidate-3',
+        name: 'Ratna Sari',
+        expectedSalary: '2200+',
+        jobType: 'cooking',
+        restDays: '2days',
+        accommodation: 'Live-out',
+        language: 'Malay',
+    },
+];
+
 let jobsDatabase: JobPosting[] = [
     {
         id: 'job-1',
@@ -78,7 +118,15 @@ let jobsDatabase: JobPosting[] = [
         jobDescription: 'General cleaning of double-storey house. Ironing, laundry, and assisting with food preparation.',
         languageRequirement: 'English / Cantonese',
     },
-];
+// Get all candidates
+export const getCandidates = async (req: Request, res: Response): Promise<void> => {
+    try {
+        res.json({ success: true, data: candidatesDatabase });
+    } catch (error) {
+        console.error('Error fetching candidates:', error);
+        res.status(500).json({ success: false, error: 'Failed to retrieve candidates' });
+    }
+};
 
 // Get all jobs
 export const getJobs = async (req: Request, res: Response): Promise<void> => {
