@@ -27,12 +27,34 @@ Welcome to SelamatKerja — an assistant and marketplace for domestic workers (K
 
 ```mermaid
 flowchart LR
-  Browser --> Frontend[Frontend (Vite + React)]
-  Frontend -->|/api/*| Vercel[Vercel Hosting]
-  Vercel -->|rewrite /api -> /_/backend/api| Backend[Backend (Express, TS)]
-  Backend --> AI[Gemini / Groq]
+  Browser --> Frontend["Frontend (Vite + React)"]
+  Frontend -->|/api/*| Vercel["Vercel Hosting"]
+  Vercel -->|rewrite /api -> /_/backend/api| Backend["Backend (Express, TypeScript)"]
+  Backend --> AI["AI Providers: Google Gemini, Groq"]
   Backend --> DB[(Postgres)]
 ```
+
+---
+
+**Tech Stack**
+
+- **Frontend:** Vite, React, TypeScript, Tailwind CSS
+- **Backend:** Node.js, Express, TypeScript
+- **Database:** PostgreSQL (via `pg`)
+- **AI / LLMs:** Google Gemini (via `@google/genai`) with a Groq/OpenAI-compatible fallback (`openai` client)
+- **Hosting / Deployment:** Vercel (single-project, frontend + backend)
+- **OCR / PDF:** `tesseract.js`, `pdf-parse`
+
+---
+
+**Features**
+
+- Contract analysis: extract key contract terms and provide simple explanations for workers
+- Rights Q&A: Retrieval-Augmented Generation (RAG) from a local knowledge base + LLM answers
+- Job matching: match job listings to worker preferences with a human-friendly explanation
+- Resilient AI handling: multiple API keys, provider fallback, and local fallbacks when providers are unavailable
+- Safe deployment: secrets kept in Vercel environment variables; server-side AI calls (no provider keys on the client)
+
 
 ---
 
@@ -145,6 +167,18 @@ vercel logs <project-name> --prod --limit 200
 - Keep secrets out of `backend/.env` — use the Vercel Environment Variables UI or CLI instead.
 
 ---
+
+**Vercel Postgres & Serverless Pooling**
+
+- If you use Vercel Postgres (recommended), set the `DATABASE_URL` environment variable in Vercel for `Production` and `Preview`.
+- Serverless functions can create many connections on cold starts. This repo uses a global cached `pg.Pool` (see `backend/src/db.ts`) so the pool is reused across invocations and reduces connection storms.
+- Pattern summary:
+  - create `Pool` once and attach to `global` / `globalThis`
+  - export that shared pool for queries
+  - this prevents many short-lived pools being created on each function call
+
+Example: see `backend/src/db.ts` for the exact implementation used in this project.
+
 
 **Contributing**
 
