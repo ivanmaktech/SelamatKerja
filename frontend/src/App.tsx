@@ -1,9 +1,9 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import ContractExplanation from './components/ContractExplanation';
 import FeeChecker from './components/FeeChecker';
 import RightsAssistant from './components/RightsAssistant';
+import JobMatcher from './components/JobMatcher';
 
 function App() {
   return (
@@ -19,6 +19,7 @@ function App() {
             <Route path="/" element={<ContractExplanation />} />
             <Route path="/fee-checker" element={<FeeChecker />} />
             <Route path="/assistant" element={<RightsAssistant />} />
+            <Route path="/matching" element={<JobMatcher />} />
           </Routes>
         </main>
       </div>
@@ -27,3 +28,4 @@ function App() {
 }
 
 export default App;
+

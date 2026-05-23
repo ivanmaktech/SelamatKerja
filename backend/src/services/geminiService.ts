@@ -239,3 +239,69 @@ User Question: ${question}
 
     return runWithFallback('answerRightsQuestion', prompt, () => buildFallbackAnswer(ragContext));
 };
+
+export const explainJobMatch = async (
+    preferences: { expectedSalary: string; jobType: string; restDays: string; accommodation: string; language?: string },
+    job: { salary: number; jobType: string; restDays: number; accommodation: string; languageRequirement: string },
+    score: number
+): Promise<string> => {
+    const prompt = `
+You are helping a domestic worker (Kakak) evaluate how well a job aligns with their preferences.
+Compare their preferences to the job details and write an extremely short, clear evaluation explaining the main reasons for this match (score: ${score}%).
+
+Preferences:
+- Expected Salary Range: ${preferences.expectedSalary}
+- Job Type: ${preferences.jobType}
+- Rest Days: ${preferences.restDays === 'weekly' ? 'Weekly (4 days/month)' : preferences.restDays === '2days' ? '2 days/month' : 'No preference'}
+- Accommodation: ${preferences.accommodation}
+- Preferred Language: ${preferences.language || 'Any'}
+
+Job Details:
+- Salary: RM ${job.salary}
+- Job Type: ${job.jobType}
+- Rest Days: ${job.restDays} days/month
+- Accommodation: ${job.accommodation}
+- Required Language: ${job.languageRequirement}
+
+Rules:
+1. Do NOT decide the matching score or explain the system's score generation. Focus purely on explaining how the job details align with what the worker wants.
+2. Keep the output VERY SHORT (maximum 2 bullets, under 25 words total).
+3. Do NOT provide any legal advice, legal assessments, or policy warnings.
+4. Keep the tone warm, simple, and encouraging.
+5. Use "✓" for preferences that are met or exceeded (e.g. ✓ Matches childcare preference).
+6. Use "⚠" for preferences that are not met (e.g. ⚠ Lower salary than expected).
+
+Format:
+- Bullet 1
+- Bullet 2
+
+Do not write any introductory or concluding text. Write only the bullet points.
+`;
+
+    const localFallback = () => {
+        const bullets: string[] = [];
+        
+        // Job Type comparison
+        if (job.jobType.toLowerCase() === preferences.jobType.toLowerCase()) {
+            bullets.push(`✓ Matches ${preferences.jobType} preference`);
+        } else {
+            bullets.push(`⚠ Different job type (${job.jobType})`);
+        }
+
+        // Salary comparison
+        let minExpected = 0;
+        if (preferences.expectedSalary === '1500-1800') minExpected = 1500;
+        else if (preferences.expectedSalary === '1800-2200') minExpected = 1800;
+        else if (preferences.expectedSalary === '2200+') minExpected = 2200;
+
+        if (job.salary >= minExpected) {
+            bullets.push(`✓ Salary within expected range`);
+        } else {
+            bullets.push(`⚠ Salary lower than expected`);
+        }
+
+        return bullets.slice(0, 2).join('\n');
+    };
+
+    return runWithFallback('explainJobMatch', prompt, localFallback);
+};

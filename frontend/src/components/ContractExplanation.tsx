@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { UploadCloud, CheckCircle2, Copy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -30,7 +30,7 @@ const fieldLabels: { key: keyof ContractFields; label: string }[] = [
   { key: 'penalties', label: 'Penalties' },
 ];
 
-export default function ContractExplanation(): JSX.Element {
+export default function ContractExplanation() {
   const [file, setFile] = useState<File | null>(null);
   const [textContext, setTextContext] = useState('');
   const [loading, setLoading] = useState(false);

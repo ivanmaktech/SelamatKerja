@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { AlertCircle, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 const FeeChecker: React.FC = () => {
     const [fee, setFee] = useState('');
