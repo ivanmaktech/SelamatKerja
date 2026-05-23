@@ -11,5 +11,8 @@
             "builder": "@vercel/node",
             "entrypoint": "src/index.ts"
         }
-    }
+    },
+    "rewrites": [
+        { "source": "/api/(.*)", "destination": "/_/backend/api/$1" }
+    ]
 }
