@@ -181,5 +181,3 @@ Contributions are welcome. Please open issues or PRs and follow the existing cod
 MIT — see [LICENSE](LICENSE)
 
 ---
-
-If you want, I can also add a small deployment checklist file in `docs/DEPLOYMENT.md` with exact UI screenshots for the Vercel steps, or a GitHub Action to run the build and upload artifacts. Which would you prefer?
